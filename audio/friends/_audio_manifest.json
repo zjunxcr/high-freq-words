@@ -1,0 +1,109 @@
+{
+  "generated_at": "2026-04-21T16:36:10.128608",
+  "total_files": 10,
+  "days_covered": "11-11",
+  "files": [
+    {
+      "word": "well",
+      "index": 101,
+      "audio_file": "audio\\friends\\day011\\well_clip.mp3",
+      "characters": [
+        "Joey",
+        "Phoebe"
+      ],
+      "turns": 5
+    },
+    {
+      "word": "what",
+      "index": 102,
+      "audio_file": "audio\\friends\\day011\\what_clip.mp3",
+      "characters": [
+        "Rachel",
+        "Monica"
+      ],
+      "turns": 5
+    },
+    {
+      "word": "when",
+      "index": 103,
+      "audio_file": "audio\\friends\\day011\\when_clip.mp3",
+      "characters": [
+        "Rachel",
+        "Ross"
+      ],
+      "turns": 5
+    },
+    {
+      "word": "which",
+      "index": 104,
+      "audio_file": "audio\\friends\\day011\\which_clip.mp3",
+      "characters": [
+        "Rachel",
+        "Monica"
+      ],
+      "turns": 4
+    },
+    {
+      "word": "will",
+      "index": 105,
+      "audio_file": "audio\\friends\\day011\\will_clip.mp3",
+      "characters": [
+        "Rachel",
+        "Ross"
+      ],
+      "turns": 4
+    },
+    {
+      "word": "with",
+      "index": 106,
+      "audio_file": "audio\\friends\\day011\\with_clip.mp3",
+      "characters": [
+        "Joey",
+        "Chandler",
+        "Both",
+        "Monica"
+      ],
+      "turns": 5
+    },
+    {
+      "word": "would",
+      "index": 107,
+      "audio_file": "audio\\friends\\day011\\would_clip.mp3",
+      "characters": [
+        "Chandler",
+        "Monica"
+      ],
+      "turns": 5
+    },
+    {
+      "word": "year",
+      "index": 108,
+      "audio_file": "audio\\friends\\day011\\year_clip.mp3",
+      "characters": [
+        "Phoebe",
+        "Mike"
+      ],
+      "turns": 5
+    },
+    {
+      "word": "you",
+      "index": 109,
+      "audio_file": "audio\\friends\\day011\\you_clip.mp3",
+      "characters": [
+        "Rachel",
+        "Ross"
+      ],
+      "turns": 6
+    },
+    {
+      "word": "your",
+      "index": 110,
+      "audio_file": "audio\\friends\\day011\\your_clip.mp3",
+      "characters": [
+        "Chandler",
+        "Monica"
+      ],
+      "turns": 5
+    }
+  ]
+}

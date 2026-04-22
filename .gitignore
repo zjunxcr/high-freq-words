@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+ENV/
+
+# 输出文件（自动生成）
+output/
+*.html
+
+# 音频文件（大文件，用 LFS 或单独管理）
+audio/**/*.mp3
+friends_clips/*.mp4
+friends_clips/*.mkv
+
+# 环境变量
+.env
+.venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# 临时文件
+*.tmp
+*.bak
+*.log
