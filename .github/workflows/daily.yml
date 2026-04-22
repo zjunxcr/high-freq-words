@@ -91,23 +91,21 @@ jobs:
       - name: Notify Feishu (飞书推送)
         env:
           FEISHU_WEBHOOK_URL: ${{ secrets.FEISHU_WEBHOOK_URL }}
+          PYTHONIOENCODING: utf-8
         run: |
           python scripts/push_notify.py feishu \
             --day ${{ steps.calc.outputs.day_num }} \
             --date ${{ steps.calc.outputs.today }} \
             --url "https://goodguy2.github.io/high-freq-words/output/high_freq_words_day$(printf '%03d' ${{ steps.calc.outputs.day_num }})_${{ steps.calc.outputs.today }}.html"
-        env:
-          PYTHONIOENCODING: utf-8
         continue-on-error: true
 
       - name: Notify WeChat (微信推送)
         env:
           WECHAT_WEBHOOK_URL: ${{ secrets.WECHAT_WEBHOOK_URL }}
-        SERVERCHAN_KEY: ${{ secrets.SERVERCHAN_KEY }}
+          SERVERCHAN_KEY: ${{ secrets.SERVERCHAN_KEY }}
+          PYTHONIOENCODING: utf-8
         run: |
           python scripts/push_notify.py wechat \
             --day ${{ steps.calc.outputs.day_num }} \
             --date ${{ steps.calc.outputs.today }}
-        env:
-          PYTHONIOENCODING: utf-8
         continue-on-error: true
