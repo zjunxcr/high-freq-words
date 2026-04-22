@@ -9,7 +9,6 @@ ENV/
 
 # 输出文件（自动生成）
 output/
-*.html
 
 # 音频文件（大文件，用 LFS 或单独管理）
 audio/**/*.mp3
