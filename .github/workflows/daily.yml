@@ -75,12 +75,21 @@ jobs:
         env:
           PYTHONIOENCODING: utf-8
 
+      - name: Embed audio into HTML (base64)
+        run: |
+          python scripts/embed_high_freq_audio.py ${{ steps.calc.outputs.day_num }} ${{ steps.calc.outputs.today }}
+        env:
+          PYTHONIOENCODING: utf-8
+
       - name: Push to GitHub Pages
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           
-          # 提交 output/(HTML) + 当天音频目录
+          # 只提交 output/（HTML已包含内嵌音频）
+          git add output/ || true
+          
+          # 也提交当天新生成的 TTS mp3 文件（保留源文件）
           DAY=${{ steps.calc.outputs.day_num }}
           START=$(( (DAY - 1) * 10 + 1 ))
           END=$(( DAY * 10 ))
@@ -88,12 +97,11 @@ jobs:
             PADDED=$(printf '%04d' $i)
             git add "audio/tts/$PADDED/" 2>/dev/null || true
           done
-          git add output/ || true
           
           if git diff --cached --quiet; then
             echo "ℹ️ No changes to commit"
           else
-            git commit -m "📚 Day ${{ steps.calc.outputs.day_num }} (${{ steps.calc.outputs.today }}) - High Freq Words"
+            git commit -m "📚 Day ${{ steps.calc.outputs.day_num }} (${{ steps.calc.outputs.today }}) - High Freq Words [audio embedded]"
             git push || echo "Push failed (might be first time)"
           fi
 
