@@ -80,7 +80,8 @@ def generate_word_card(word_data, index):
             <button class="btn-audio btn-audio-tts" onclick="playLocalAudio('{word_id}')" ontouchstart="this.onclick(event)" id="{word_id}_btn">
                 <span class="icon">🔊</span> 单词发音
             </button>
-            <audio id="{word_id}" preload="auto"><source src="audio/tts/{index:04d}/word.mp3" type="audio/mpeg"></audio>'''
+            <audio id="{word_id}" preload="auto"><source src="audio/tts/{index:04d}/word.mp3" type="audio/mpeg"></audio>
+            <script>_fallbackText["{word_id}"] = "{word}";</script>'''
     else:
         # Fallback: Web Speech API
         word_btn_html = f'''
@@ -95,7 +96,8 @@ def generate_word_card(word_data, index):
             <button class="btn-audio btn-audio-tts" onclick="playLocalAudio('{sent_id}')" ontouchstart="this.onclick(event)" id="{sent_id}_btn">
                 <span class="icon">🗣️</span> 例句朗读
             </button>
-            <audio id="{sent_id}" preload="auto"><source src="audio/tts/{index:04d}/sentence.mp3" type="audio/mpeg"></audio>'''
+            <audio id="{sent_id}" preload="auto"><source src="audio/tts/{index:04d}/sentence.mp3" type="audio/mpeg"></audio>
+            <script>_fallbackText["{sent_id}"] = "{sentence_escaped}";</script>'''
     else:
         sentence_escaped = word_data.get('sentence','').replace("`","\\`").replace("${","\\${")
         sent_btn_html = f'''
