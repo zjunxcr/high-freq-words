@@ -599,8 +599,16 @@ function togglePlayer(playerId, btnId, iframeId, embedUrl) {
         if (failEl)    failEl.style.display    = 'none';
         iframe.style.display = 'none';
 
-        // Set iframe src to actually load
-        iframe.src = embedUrl;
+        // Force fresh load: add timestamp to bust cache & ensure correct page
+        const sep = embedUrl.indexOf('?') > -1 ? '&' : '?';
+        const freshUrl = embedUrl + sep + '_t=' + Date.now();
+        
+        // Reset iframe completely before setting new src
+        iframe.src = 'about:blank';
+        // Use setTimeout to ensure the browser registers the about:blank reset first
+        setTimeout(() => {
+            iframe.src = freshUrl;
+        }, 50);
 
         // Timeout: if iframe doesn't trigger onload in 8s, show fail
         const timer = setTimeout(() => {
