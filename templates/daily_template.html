@@ -202,6 +202,11 @@
             color: #fff;
             animation: glow-light 1s ease-in-out infinite alternate;
         }
+        .btn-audio.audio-error {
+            background: #e53e3e;
+            border-color: #e53e3e;
+            color: #fff;
+        }
         @keyframes glow-light {
             from { box-shadow: 0 0 5px rgba(102,126,234,0.3); }
             to { box-shadow: 0 0 15px rgba(102,126,234,0.25), 0 0 25px rgba(102,126,234,0.15); }
@@ -446,6 +451,7 @@ if ('speechSynthesis' in window) {
 
 // ========== Local TTS Audio Playback (mp3 files) ==========
 let _activeAudioId = null;
+let _fallbackText = {}; // 存储每个音频ID对应的备用文本
 function playLocalAudio(audioId) {
     const audio   = document.getElementById(audioId);
     const btn     = document.getElementById(audioId + '_btn');
@@ -454,7 +460,7 @@ function playLocalAudio(audioId) {
     // Stop any currently playing audio
     document.querySelectorAll('.btn-audio-tts').forEach(b => {
         b.classList.remove('playing');
-        // restore original text (remove playing indicator)
+        b.classList.remove('audio-error');
         const origText = b.getAttribute('data-orig-text');
         if (origText) b.innerHTML = origText;
     });
@@ -474,28 +480,36 @@ function playLocalAudio(audioId) {
             btn.setAttribute('data-orig-text', btn.innerHTML);
         }
         btn.classList.add('playing');
-        
+
         const playPromise = audio.play();
         if (playPromise !== undefined) {
             playPromise.then(() => {
-                // update button to show playing state
                 btn.classList.add('playing');
                 btn.innerHTML = btn.getAttribute('data-orig-text').replace('🔊', '⏸').replace('🗣️', '⏸');
             }).catch(e => {
-                console.warn('Audio autoplay blocked:', e);
+                console.warn('Audio play blocked or failed, fallback to Web Speech:', e);
                 btn.classList.remove('playing');
                 _activeAudioId = null;
+                // Fallback: 使用 Web Speech API
+                const fbText = _fallbackText[audioId];
+                if (fbText) speak(fbText, audioId.startsWith('w_') ? 0.55 : 0.6);
             });
         }
-        
+
         audio.onended = function() {
             btn.classList.remove('playing');
+            btn.classList.remove('audio-error');
             btn.innerHTML = btn.getAttribute('data-orig-text') || btn.innerHTML;
             _activeAudioId = null;
         };
-        audio.onerror = function() {
+        audio.onerror = function(e) {
+            console.error('Audio error:', audioId, e);
             btn.classList.remove('playing');
+            btn.classList.add('audio-error');
             _activeAudioId = null;
+            // Fallback: 使用 Web Speech API
+            const fbText = _fallbackText[audioId];
+            if (fbText) { speak(fbText, audioId.startsWith('w_') ? 0.55 : 0.6); setTimeout(() => btn.classList.remove('audio-error'), 2000); }
         };
     }
 }
