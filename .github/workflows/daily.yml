@@ -2,8 +2,8 @@ name: Daily High-Freq Words Generator
 
 on:
   schedule:
-    # 北京时间每天 10:00 = UTC 02:00
-    - cron: '0 2 * * *'
+    # 北京时间每天 9:00 = UTC 01:00（提前到9点，因为GitHub免费版schedule可能延迟1-2小时）
+    - cron: '0 1 * * *'
   workflow_dispatch:
     inputs:
       day_num:
@@ -116,5 +116,6 @@ jobs:
         run: |
           python scripts/push_notify.py wechat \
             --day ${{ steps.calc.outputs.day_num }} \
-            --date ${{ steps.calc.outputs.today }}
+            --date ${{ steps.calc.outputs.today }} \
+            --url "https://zjunxcr.github.io/high-freq-words/output/high_freq_words_day$(printf '%03d' ${{ steps.calc.outputs.day_num }})_${{ steps.calc.outputs.today }}.html"
         continue-on-error: true
