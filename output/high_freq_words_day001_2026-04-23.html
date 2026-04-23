@@ -202,6 +202,11 @@
             color: #fff;
             animation: glow-light 1s ease-in-out infinite alternate;
         }
+        .btn-audio.audio-error {
+            background: #e53e3e;
+            border-color: #e53e3e;
+            color: #fff;
+        }
         @keyframes glow-light {
             from { box-shadow: 0 0 5px rgba(102,126,234,0.3); }
             to { box-shadow: 0 0 15px rgba(102,126,234,0.25), 0 0 25px rgba(102,126,234,0.15); }
@@ -523,11 +528,13 @@
                 <span class="icon">🔊</span> 单词发音
             </button>
             <audio id="w_1_audio" preload="auto"><source src="audio/tts/0001/word.mp3" type="audio/mpeg"></audio>
+            <script>_fallbackText["w_1_audio"] = "a";</script>
             
             <button class="btn-audio btn-audio-tts" onclick="playLocalAudio('s_1_audio')" ontouchstart="this.onclick(event)" id="s_1_audio_btn">
                 <span class="icon">🗣️</span> 例句朗读
             </button>
             <audio id="s_1_audio" preload="auto"><source src="audio/tts/0001/sentence.mp3" type="audio/mpeg"></audio>
+            <script>_fallbackText["s_1_audio"] = "I have a book.";</script>
         </div>
         
         <div class="example-box">
@@ -551,11 +558,13 @@
                 <span class="icon">🔊</span> 单词发音
             </button>
             <audio id="w_2_audio" preload="auto"><source src="audio/tts/0002/word.mp3" type="audio/mpeg"></audio>
+            <script>_fallbackText["w_2_audio"] = "able";</script>
             
             <button class="btn-audio btn-audio-tts" onclick="playLocalAudio('s_2_audio')" ontouchstart="this.onclick(event)" id="s_2_audio_btn">
                 <span class="icon">🗣️</span> 例句朗读
             </button>
             <audio id="s_2_audio" preload="auto"><source src="audio/tts/0002/sentence.mp3" type="audio/mpeg"></audio>
+            <script>_fallbackText["s_2_audio"] = "I want to learn how to use \'able\' correctly.";</script>
         </div>
         
         <div class="example-box">
@@ -579,11 +588,13 @@
                 <span class="icon">🔊</span> 单词发音
             </button>
             <audio id="w_3_audio" preload="auto"><source src="audio/tts/0003/word.mp3" type="audio/mpeg"></audio>
+            <script>_fallbackText["w_3_audio"] = "about";</script>
             
             <button class="btn-audio btn-audio-tts" onclick="playLocalAudio('s_3_audio')" ontouchstart="this.onclick(event)" id="s_3_audio_btn">
                 <span class="icon">🗣️</span> 例句朗读
             </button>
             <audio id="s_3_audio" preload="auto"><source src="audio/tts/0003/sentence.mp3" type="audio/mpeg"></audio>
+            <script>_fallbackText["s_3_audio"] = "Tell me about your day.";</script>
         </div>
         
         <div class="example-box">
@@ -607,11 +618,13 @@
                 <span class="icon">🔊</span> 单词发音
             </button>
             <audio id="w_4_audio" preload="auto"><source src="audio/tts/0004/word.mp3" type="audio/mpeg"></audio>
+            <script>_fallbackText["w_4_audio"] = "above";</script>
             
             <button class="btn-audio btn-audio-tts" onclick="playLocalAudio('s_4_audio')" ontouchstart="this.onclick(event)" id="s_4_audio_btn">
                 <span class="icon">🗣️</span> 例句朗读
             </button>
             <audio id="s_4_audio" preload="auto"><source src="audio/tts/0004/sentence.mp3" type="audio/mpeg"></audio>
+            <script>_fallbackText["s_4_audio"] = "I need to above this right now.";</script>
         </div>
         
         <div class="example-box">
@@ -635,11 +648,13 @@
                 <span class="icon">🔊</span> 单词发音
             </button>
             <audio id="w_5_audio" preload="auto"><source src="audio/tts/0005/word.mp3" type="audio/mpeg"></audio>
+            <script>_fallbackText["w_5_audio"] = "absolutely";</script>
             
             <button class="btn-audio btn-audio-tts" onclick="playLocalAudio('s_5_audio')" ontouchstart="this.onclick(event)" id="s_5_audio_btn">
                 <span class="icon">🗣️</span> 例句朗读
             </button>
             <audio id="s_5_audio" preload="auto"><source src="audio/tts/0005/sentence.mp3" type="audio/mpeg"></audio>
+            <script>_fallbackText["s_5_audio"] = "I need to absolutely this right now.";</script>
         </div>
         
         <div class="example-box">
@@ -663,11 +678,13 @@
                 <span class="icon">🔊</span> 单词发音
             </button>
             <audio id="w_6_audio" preload="auto"><source src="audio/tts/0006/word.mp3" type="audio/mpeg"></audio>
+            <script>_fallbackText["w_6_audio"] = "across";</script>
             
             <button class="btn-audio btn-audio-tts" onclick="playLocalAudio('s_6_audio')" ontouchstart="this.onclick(event)" id="s_6_audio_btn">
                 <span class="icon">🗣️</span> 例句朗读
             </button>
             <audio id="s_6_audio" preload="auto"><source src="audio/tts/0006/sentence.mp3" type="audio/mpeg"></audio>
+            <script>_fallbackText["s_6_audio"] = "I need to across this right now.";</script>
         </div>
         
         <div class="example-box">
@@ -691,11 +708,13 @@
                 <span class="icon">🔊</span> 单词发音
             </button>
             <audio id="w_7_audio" preload="auto"><source src="audio/tts/0007/word.mp3" type="audio/mpeg"></audio>
+            <script>_fallbackText["w_7_audio"] = "actor";</script>
             
             <button class="btn-audio btn-audio-tts" onclick="playLocalAudio('s_7_audio')" ontouchstart="this.onclick(event)" id="s_7_audio_btn">
                 <span class="icon">🗣️</span> 例句朗读
             </button>
             <audio id="s_7_audio" preload="auto"><source src="audio/tts/0007/sentence.mp3" type="audio/mpeg"></audio>
+            <script>_fallbackText["s_7_audio"] = "I need to actor this right now.";</script>
         </div>
         
         <div class="example-box">
@@ -719,11 +738,13 @@
                 <span class="icon">🔊</span> 单词发音
             </button>
             <audio id="w_8_audio" preload="auto"><source src="audio/tts/0008/word.mp3" type="audio/mpeg"></audio>
+            <script>_fallbackText["w_8_audio"] = "actually";</script>
             
             <button class="btn-audio btn-audio-tts" onclick="playLocalAudio('s_8_audio')" ontouchstart="this.onclick(event)" id="s_8_audio_btn">
                 <span class="icon">🗣️</span> 例句朗读
             </button>
             <audio id="s_8_audio" preload="auto"><source src="audio/tts/0008/sentence.mp3" type="audio/mpeg"></audio>
+            <script>_fallbackText["s_8_audio"] = "I need to actually this right now.";</script>
         </div>
         
         <div class="example-box">
@@ -747,11 +768,13 @@
                 <span class="icon">🔊</span> 单词发音
             </button>
             <audio id="w_9_audio" preload="auto"><source src="audio/tts/0009/word.mp3" type="audio/mpeg"></audio>
+            <script>_fallbackText["w_9_audio"] = "advice";</script>
             
             <button class="btn-audio btn-audio-tts" onclick="playLocalAudio('s_9_audio')" ontouchstart="this.onclick(event)" id="s_9_audio_btn">
                 <span class="icon">🗣️</span> 例句朗读
             </button>
             <audio id="s_9_audio" preload="auto"><source src="audio/tts/0009/sentence.mp3" type="audio/mpeg"></audio>
+            <script>_fallbackText["s_9_audio"] = "I want to learn how to use \'advice\' correctly.";</script>
         </div>
         
         <div class="example-box">
@@ -775,11 +798,13 @@
                 <span class="icon">🔊</span> 单词发音
             </button>
             <audio id="w_10_audio" preload="auto"><source src="audio/tts/0010/word.mp3" type="audio/mpeg"></audio>
+            <script>_fallbackText["w_10_audio"] = "afraid";</script>
             
             <button class="btn-audio btn-audio-tts" onclick="playLocalAudio('s_10_audio')" ontouchstart="this.onclick(event)" id="s_10_audio_btn">
                 <span class="icon">🗣️</span> 例句朗读
             </button>
             <audio id="s_10_audio" preload="auto"><source src="audio/tts/0010/sentence.mp3" type="audio/mpeg"></audio>
+            <script>_fallbackText["s_10_audio"] = "I need to afraid this right now.";</script>
         </div>
         
         <div class="example-box">
@@ -1221,6 +1246,7 @@ if ('speechSynthesis' in window) {
 
 // ========== Local TTS Audio Playback (mp3 files) ==========
 let _activeAudioId = null;
+let _fallbackText = {}; // 存储每个音频ID对应的备用文本
 function playLocalAudio(audioId) {
     const audio   = document.getElementById(audioId);
     const btn     = document.getElementById(audioId + '_btn');
@@ -1229,7 +1255,7 @@ function playLocalAudio(audioId) {
     // Stop any currently playing audio
     document.querySelectorAll('.btn-audio-tts').forEach(b => {
         b.classList.remove('playing');
-        // restore original text (remove playing indicator)
+        b.classList.remove('audio-error');
         const origText = b.getAttribute('data-orig-text');
         if (origText) b.innerHTML = origText;
     });
@@ -1249,28 +1275,36 @@ function playLocalAudio(audioId) {
             btn.setAttribute('data-orig-text', btn.innerHTML);
         }
         btn.classList.add('playing');
-        
+
         const playPromise = audio.play();
         if (playPromise !== undefined) {
             playPromise.then(() => {
-                // update button to show playing state
                 btn.classList.add('playing');
                 btn.innerHTML = btn.getAttribute('data-orig-text').replace('🔊', '⏸').replace('🗣️', '⏸');
             }).catch(e => {
-                console.warn('Audio autoplay blocked:', e);
+                console.warn('Audio play blocked or failed, fallback to Web Speech:', e);
                 btn.classList.remove('playing');
                 _activeAudioId = null;
+                // Fallback: 使用 Web Speech API
+                const fbText = _fallbackText[audioId];
+                if (fbText) speak(fbText, audioId.startsWith('w_') ? 0.55 : 0.6);
             });
         }
-        
+
         audio.onended = function() {
             btn.classList.remove('playing');
+            btn.classList.remove('audio-error');
             btn.innerHTML = btn.getAttribute('data-orig-text') || btn.innerHTML;
             _activeAudioId = null;
         };
-        audio.onerror = function() {
+        audio.onerror = function(e) {
+            console.error('Audio error:', audioId, e);
             btn.classList.remove('playing');
+            btn.classList.add('audio-error');
             _activeAudioId = null;
+            // Fallback: 使用 Web Speech API
+            const fbText = _fallbackText[audioId];
+            if (fbText) { speak(fbText, audioId.startsWith('w_') ? 0.55 : 0.6); setTimeout(() => btn.classList.remove('audio-error'), 2000); }
         };
     }
 }
