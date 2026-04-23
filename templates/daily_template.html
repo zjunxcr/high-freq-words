@@ -431,31 +431,44 @@
 
 <script>
 // ========== TTS (Web Speech API - fallback) ==========
-function speak(text, rate = 0.6) {
-    if ('speechSynthesis' in window) {
-        speechSynthesis.cancel();
-        const u = new SpeechSynthesisUtterance(text);
-        u.lang = 'en-US'; u.rate = rate; u.pitch = 1;
-        const voices = speechSynthesis.getVoices();
-        const pref = voices.find(v =>
-            v.name.includes('Jenny') || v.name.includes('Samantha') ||
-            v.name.includes('Microsoft Zira') || v.name.includes('Google US'));
-        if (pref) u.voice = pref;
-        speechSynthesis.speak(u);
+let _ttsReady = false;
+function speak(text, rate = 0.5) {
+    if (!('speechSynthesis' in window)) {
+        console.warn('Web Speech API not supported');
+        return;
     }
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'en-US'; u.rate = rate; u.pitch = 1;
+    
+    // Try to pick a good English voice
+    const voices = speechSynthesis.getVoices();
+    const pref = voices.find(v =>
+        v.name.includes('Jenny') || v.name.includes('Samantha') ||
+        v.name.includes('Microsoft Zira') || v.name.includes('Google US'));
+    if (pref) u.voice = pref;
+    
+    // Debug: log if no voice found
+    if (voices.length === 0) {
+        console.warn('No TTS voices available yet, speaking anyway...');
+    }
+    
+    speechSynthesis.speak(u);
 }
+// Load voices (may be async in some browsers)
 if ('speechSynthesis' in window) {
-    speechSynthesis.getVoices();
-    speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
+    const loadVoices = () => { speechSynthesis.getVoices(); _ttsReady = true; };
+    loadVoices();
+    speechSynthesis.onvoiceschanged = loadVoices;
 }
 
 // ========== Local TTS Audio Playback (mp3 files) ==========
 let _activeAudioId = null;
-let _fallbackText = {}; // 存储每个音频ID对应的备用文本
+let _fallbackText = {}; // store fallback text for each audio ID
 function playLocalAudio(audioId) {
     const audio   = document.getElementById(audioId);
     const btn     = document.getElementById(audioId + '_btn');
-    if (!audio || !btn) return;
+    if (!audio || !btn) { console.warn('Element not found:', audioId); return; }
 
     // Stop any currently playing audio
     document.querySelectorAll('.btn-audio-tts').forEach(b => {
@@ -481,18 +494,34 @@ function playLocalAudio(audioId) {
         }
         btn.classList.add('playing');
 
+        // Slow down playback for learning
+        audio.playbackRate = audioId.startsWith('w_') ? 0.75 : 0.65;
+
+        // Check if audio src can be loaded (detect file:// protocol issues)
+        const src = audio.getAttribute('src') || (audio.querySelector('source') ? audio.querySelector('source').getAttribute('src') : '');
+        const isLocalFile = window.location.protocol === 'file:';
+
         const playPromise = audio.play();
         if (playPromise !== undefined) {
             playPromise.then(() => {
                 btn.classList.add('playing');
                 btn.innerHTML = btn.getAttribute('data-orig-text').replace('🔊', '⏸').replace('🗣️', '⏸');
+                console.log('Audio playing OK:', audioId);
             }).catch(e => {
-                console.warn('Audio play blocked or failed, fallback to Web Speech:', e);
+                console.warn('Audio play() failed, using TTS fallback:', e, audioId);
                 btn.classList.remove('playing');
                 _activeAudioId = null;
-                // Fallback: 使用 Web Speech API
+                // Fallback to Web Speech API
                 const fbText = _fallbackText[audioId];
-                if (fbText) speak(fbText, audioId.startsWith('w_') ? 0.55 : 0.6);
+                if (fbText) {
+                    speak(fbText, audioId.startsWith('w_') ? 0.45 : 0.4);
+                    // Visual feedback for fallback
+                    btn.classList.add('playing');
+                    setTimeout(() => { btn.classList.remove('playing'); btn.innerHTML = btn.getAttribute('data-orig-text') || btn.innerHTML; }, 2000);
+                } else {
+                    btn.classList.add('audio-error');
+                    setTimeout(() => btn.classList.remove('audio-error'), 2000);
+                }
             });
         }
 
@@ -503,13 +532,16 @@ function playLocalAudio(audioId) {
             _activeAudioId = null;
         };
         audio.onerror = function(e) {
-            console.error('Audio error:', audioId, e);
+            console.error('Audio load error, using TTS fallback:', audioId, e);
             btn.classList.remove('playing');
             btn.classList.add('audio-error');
             _activeAudioId = null;
-            // Fallback: 使用 Web Speech API
+            // Fallback to Web Speech API
             const fbText = _fallbackText[audioId];
-            if (fbText) { speak(fbText, audioId.startsWith('w_') ? 0.55 : 0.6); setTimeout(() => btn.classList.remove('audio-error'), 2000); }
+            if (fbText) { 
+                speak(fbText, audioId.startsWith('w_') ? 0.45 : 0.4); 
+                setTimeout(() => btn.classList.remove('audio-error'), 2000); 
+            }
         };
     }
 }
