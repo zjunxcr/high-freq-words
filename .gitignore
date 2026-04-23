@@ -7,11 +7,9 @@ __pycache__/
 venv/
 ENV/
 
-# 输出文件（自动生成）
-output/
-
-# 音频文件（大文件，用 LFS 或单独管理）
-audio/**/*.mp3
+# output/ 和 audio/tts/ 允许提交（GitHub Pages 和 GitHub Actions 需要）
+# 只排除老友记原声（大文件，本地使用）
+audio/friends/**/*.mp3
 friends_clips/*.mp4
 friends_clips/*.mkv
 

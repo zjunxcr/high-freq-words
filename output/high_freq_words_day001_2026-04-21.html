@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>高频词汇学习 - Day 1</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+            background: #e8ecf1;
+            background-image: 
+                radial-gradient(at 20% 30%, rgba(102,126,234,0.06) 0%, transparent 50%),
+                radial-gradient(at 80% 70%, rgba(72,187,120,0.06) 0%, transparent 50%);
+            min-height: 100vh;
+            color: #2d3748;
+            padding-bottom: 60px;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 30px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #48bb78 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 60%);
+            animation: shimmer 10s infinite linear;
+        }
+        @keyframes shimmer {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .header h1 {
+            font-size: 26px;
+            color: #fff;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            position: relative;
+        }
+        .header .subtitle {
+            font-size: 14px;
+            color: rgba(255,255,255,0.9);
+            position: relative;
+        }
+        .progress-bar {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            position: relative;
+        }
+        .progress-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.35);
+            transition: all 0.3s;
+        }
+        .progress-dot.done { background: #fff; box-shadow: 0 0 6px rgba(255,255,255,0.6); }
+        .progress-dot.current { background: #fdd835; box-shadow: 0 0 8px #fdd835; animation: pulse 1.5s infinite; }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+        }
+
+        /* Word Cards Section */
+        .section-title {
+            text-align: center;
+            font-size: 20px;
+            font-weight: 600;
+            color: #2d3748;
+            margin: 30px 20px 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .section-title .emoji { font-size: 24px; }
+
+        .cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 18px;
+            padding: 0 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .word-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 22px;
+            border: 1px solid #dde4ed;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+            position: relative;
+            overflow: hidden;
+        }
+        .word-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 28px rgba(102,126,234,0.15);
+            border-color: #a3bffa;
+        }
+        .word-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #667eea, #48bb78, #ed8936);
+        }
+        .card-number {
+            position: absolute;
+            top: 12px;
+            right: 15px;
+            font-size: 11px;
+            color: #a0aec0;
+            font-weight: 600;
+        }
+
+        .word-main {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+        }
+        .word-text {
+            font-size: 28px;
+            font-weight: 700;
+            color: #5a67d8;
+            letter-spacing: 0.5px;
+        }
+        .phonetic {
+            font-size: 15px;
+            color: #718096;
+            font-family: "Lucida Sans Unicode", "Arial Unicode MS", sans-serif;
+        }
+        .meaning {
+            font-size: 15px;
+            color: #4a5568;
+            margin-bottom: 12px;
+            line-height: 1.55;
+        }
+        .level-badge {
+            display: inline-block;
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-right: 6px;
+            font-weight: 600;
+        }
+        .level-1 { background: #ebf8ff; color: #2b6cb0; border: 1px solid #bee3f8; }
+        .level-2 { background: #faf5ff; color: #6b46c1; border: 1px solid #e9d8fd; }
+        .level-3 { background: #fffff0; color: #b7791f; border: 1px solid #fefcbf; }
+
+        /* Audio Buttons */
+        .audio-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+        .btn-audio {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 1px solid #e2e8f0;
+            background: #f7fafc;
+            color: #4a5568;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .btn-audio:hover {
+            background: #eef2ff;
+            border-color: #667eea;
+            color: #5a67d8;
+        }
+        .btn-audio.playing {
+            background: #667eea;
+            border-color: #667eea;
+            color: #fff;
+            animation: glow-light 1s ease-in-out infinite alternate;
+        }
+        @keyframes glow-light {
+            from { box-shadow: 0 0 5px rgba(102,126,234,0.3); }
+            to { box-shadow: 0 0 15px rgba(102,126,234,0.25), 0 0 25px rgba(102,126,234,0.15); }
+        }
+        .btn-audio .icon { font-size: 14px; }
+
+        /* Example Sentence */
+        .example-box {
+            background: #f7fafc;
+            border-radius: 10px;
+            padding: 12px 14px;
+            margin-top: 10px;
+            border: 1px solid #edf2f7;
+        }
+        .example-label {
+            font-size: 11px;
+            color: #a0aec0;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+        .example-en {
+            font-size: 15px;
+            color: #2d3748;
+            line-height: 1.6;
+            margin-bottom: 4px;
+        }
+        .example-cn {
+            font-size: 13px;
+            color: #718096;
+            line-height: 1.5;
+        }
+
+        /* Friends Scene */
+        .friends-section {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        .scene-card {
+            background: #fff;
+            border-radius: 18px;
+            padding: 25px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            position: relative;
+            overflow: hidden;
+        }
+        .scene-card::after {
+            content: '☕';
+            position: absolute;
+            bottom: -10px;
+            right: -10px;
+            font-size: 80px;
+            opacity: 0.06;
+        }
+        .scene-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .scene-header h3 {
+            font-size: 18px;
+            color: #dd6b20;
+        }
+        .scene-dialogue {
+            background: #fffaf0;
+            border-left: 3px solid #ed8936;
+            border-radius: 0 10px 10px 0;
+            padding: 14px 18px;
+            margin: 10px 0;
+            font-style: italic;
+            font-size: 17px;
+            line-height: 1.7;
+            color: #2d3748;
+        }
+        .scene-translation {
+            color: #718096;
+            font-size: 14px;
+            margin-top: 8px;
+            padding-left: 12px;
+            border-left: 2px solid #e2e8f0;
+        }
+        .scene-audio-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 12px;
+            padding: 10px 22px;
+            border-radius: 25px;
+            border: none;
+            background: linear-gradient(90deg, #ed8936, #667eea);
+            color: #fff;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .scene-audio-btn:hover {
+            transform: scale(1.03);
+            box-shadow: 0 6px 20px rgba(237,137,54,0.3);
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 25px;
+            color: #a0aec0;
+            font-size: 13px;
+            margin-top: 40px;
+        }
+        .footer a { color: #667eea; text-decoration: none; }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .header h1 { font-size: 20px; }
+            .word-text { font-size: 24px; }
+            .cards-container { grid-template-columns: 1fr; }
+            .scene-dialogue { font-size: 15px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ===== Header ===== -->
+<div class="header">
+    <h1>📚 1000 High-Frequency Words</h1>
+    <div class="subtitle">Day 1 · 第1-10词 · 2026-04-21</div>
+    <div class="progress-bar">
+        <div class="progress-dot current"></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+    </div>
+</div>
+
+<!-- ===== Word Cards ===== -->
+<div class="section-title"><span class="emoji">📝</span> 今日单词</div>
+<div class="cards-container">
+
+    <div class="word-card">
+        <div class="card-number">#1</div>
+        <div class="word-main">
+            <span class="word-text">a</span>
+            <span class="phonetic">/ə/ /eɪ/</span>
+        </div>
+        <div class="meaning"><span class="level-badge level-1">Lv.1</span> art. 一个；任一</div>
+        
+        <div class="audio-row">
+            <button class="btn-audio" onclick="speak('a', 0.55)" ontouchstart="this.onclick(event)">
+                <span class="icon">🔊</span> 单词发音
+            </button>
+            <button class="btn-audio" onclick="speak(`I have a book.`, 0.6)" ontouchstart="this.onclick(event)">
+                <span class="icon">🗣️</span> 例句朗读
+            </button>
+        </div>
+        
+        <div class="example-box">
+            <div class="example-label">例句 Example</div>
+            <div class="example-en">I have a book.</div>
+            <div class="example-cn">我有一本书。</div>
+        </div>
+    </div>
+    
+    <div class="word-card">
+        <div class="card-number">#2</div>
+        <div class="word-main">
+            <span class="word-text">about</span>
+            <span class="phonetic">/əˈbaʊt/</span>
+        </div>
+        <div class="meaning"><span class="level-badge level-1">Lv.1</span> prep. 关于；大约 adv. 大约</div>
+        
+        <div class="audio-row">
+            <button class="btn-audio" onclick="speak('about', 0.55)" ontouchstart="this.onclick(event)">
+                <span class="icon">🔊</span> 单词发音
+            </button>
+            <button class="btn-audio" onclick="speak(`Tell me about your day.`, 0.6)" ontouchstart="this.onclick(event)">
+                <span class="icon">🗣️</span> 例句朗读
+            </button>
+        </div>
+        
+        <div class="example-box">
+            <div class="example-label">例句 Example</div>
+            <div class="example-en">Tell me about your day.</div>
+            <div class="example-cn">告诉我你今天过得怎么样。</div>
+        </div>
+    </div>
+    
+    <div class="word-card">
+        <div class="card-number">#3</div>
+        <div class="word-main">
+            <span class="word-text">all</span>
+            <span class="phonetic">/ɔːl/</span>
+        </div>
+        <div class="meaning"><span class="level-badge level-1">Lv.1</span> adj. 所有的；全部的 pron. 全部</div>
+        
+        <div class="audio-row">
+            <button class="btn-audio" onclick="speak('all', 0.55)" ontouchstart="this.onclick(event)">
+                <span class="icon">🔊</span> 单词发音
+            </button>
+            <button class="btn-audio" onclick="speak(`All my friends are here.`, 0.6)" ontouchstart="this.onclick(event)">
+                <span class="icon">🗣️</span> 例句朗读
+            </button>
+        </div>
+        
+        <div class="example-box">
+            <div class="example-label">例句 Example</div>
+            <div class="example-en">All my friends are here.</div>
+            <div class="example-cn">我所有的朋友都在这儿。</div>
+        </div>
+    </div>
+    
+    <div class="word-card">
+        <div class="card-number">#4</div>
+        <div class="word-main">
+            <span class="word-text">also</span>
+            <span class="phonetic">/ˈɔːlsəʊ/</span>
+        </div>
+        <div class="meaning"><span class="level-badge level-1">Lv.1</span> adv. 也；同样；而且</div>
+        
+        <div class="audio-row">
+            <button class="btn-audio" onclick="speak('also', 0.55)" ontouchstart="this.onclick(event)">
+                <span class="icon">🔊</span> 单词发音
+            </button>
+            <button class="btn-audio" onclick="speak(`She also likes music.`, 0.6)" ontouchstart="this.onclick(event)">
+                <span class="icon">🗣️</span> 例句朗读
+            </button>
+        </div>
+        
+        <div class="example-box">
+            <div class="example-label">例句 Example</div>
+            <div class="example-en">She also likes music.</div>
+            <div class="example-cn">她也喜欢音乐。</div>
+        </div>
+    </div>
+    
+    <div class="word-card">
+        <div class="card-number">#5</div>
+        <div class="word-main">
+            <span class="word-text">am</span>
+            <span class="phonetic">/æm/ /əm/</span>
+        </div>
+        <div class="meaning"><span class="level-badge level-1">Lv.1</span> v. 是（I的be动词形式）</div>
+        
+        <div class="audio-row">
+            <button class="btn-audio" onclick="speak('am', 0.55)" ontouchstart="this.onclick(event)">
+                <span class="icon">🔊</span> 单词发音
+            </button>
+            <button class="btn-audio" onclick="speak(`I am a student.`, 0.6)" ontouchstart="this.onclick(event)">
+                <span class="icon">🗣️</span> 例句朗读
+            </button>
+        </div>
+        
+        <div class="example-box">
+            <div class="example-label">例句 Example</div>
+            <div class="example-en">I am a student.</div>
+            <div class="example-cn">我是一个学生。</div>
+        </div>
+    </div>
+    
+    <div class="word-card">
+        <div class="card-number">#6</div>
+        <div class="word-main">
+            <span class="word-text">an</span>
+            <span class="phonetic">/ən/ /æn/</span>
+        </div>
+        <div class="meaning"><span class="level-badge level-1">Lv.1</span> art. 一个（用于元音前）</div>
+        
+        <div class="audio-row">
+            <button class="btn-audio" onclick="speak('an', 0.55)" ontouchstart="this.onclick(event)">
+                <span class="icon">🔊</span> 单词发音
+            </button>
+            <button class="btn-audio" onclick="speak(`This is an apple.`, 0.6)" ontouchstart="this.onclick(event)">
+                <span class="icon">🗣️</span> 例句朗读
+            </button>
+        </div>
+        
+        <div class="example-box">
+            <div class="example-label">例句 Example</div>
+            <div class="example-en">This is an apple.</div>
+            <div class="example-cn">这是一个苹果。</div>
+        </div>
+    </div>
+    
+    <div class="word-card">
+        <div class="card-number">#7</div>
+        <div class="word-main">
+            <span class="word-text">and</span>
+            <span class="phonetic">/ænd/ /ənd/</span>
+        </div>
+        <div class="meaning"><span class="level-badge level-1">Lv.1</span> conj. 和；又；而</div>
+        
+        <div class="audio-row">
+            <button class="btn-audio" onclick="speak('and', 0.55)" ontouchstart="this.onclick(event)">
+                <span class="icon">🔊</span> 单词发音
+            </button>
+            <button class="btn-audio" onclick="speak(`I like tea and coffee.`, 0.6)" ontouchstart="this.onclick(event)">
+                <span class="icon">🗣️</span> 例句朗读
+            </button>
+        </div>
+        
+        <div class="example-box">
+            <div class="example-label">例句 Example</div>
+            <div class="example-en">I like tea and coffee.</div>
+            <div class="example-cn">我喜欢茶和咖啡。</div>
+        </div>
+    </div>
+    
+    <div class="word-card">
+        <div class="card-number">#8</div>
+        <div class="word-main">
+            <span class="word-text">are</span>
+            <span class="phonetic">/ɑːr/ /ər/</span>
+        </div>
+        <div class="meaning"><span class="level-badge level-1">Lv.1</span> v. 是（you/we/they的be动词形式）</div>
+        
+        <div class="audio-row">
+            <button class="btn-audio" onclick="speak('are', 0.55)" ontouchstart="this.onclick(event)">
+                <span class="icon">🔊</span> 单词发音
+            </button>
+            <button class="btn-audio" onclick="speak(`They are my classmates.`, 0.6)" ontouchstart="this.onclick(event)">
+                <span class="icon">🗣️</span> 例句朗读
+            </button>
+        </div>
+        
+        <div class="example-box">
+            <div class="example-label">例句 Example</div>
+            <div class="example-en">They are my classmates.</div>
+            <div class="example-cn">他们是我的同学。</div>
+        </div>
+    </div>
+    
+    <div class="word-card">
+        <div class="card-number">#9</div>
+        <div class="word-main">
+            <span class="word-text">as</span>
+            <span class="phonetic">/æz/ /əz/</span>
+        </div>
+        <div class="meaning"><span class="level-badge level-1">Lv.1</span> prep. 作为；如同 conj. 当…时</div>
+        
+        <div class="audio-row">
+            <button class="btn-audio" onclick="speak('as', 0.55)" ontouchstart="this.onclick(event)">
+                <span class="icon">🔊</span> 单词发音
+            </button>
+            <button class="btn-audio" onclick="speak(`He works as a teacher.`, 0.6)" ontouchstart="this.onclick(event)">
+                <span class="icon">🗣️</span> 例句朗读
+            </button>
+        </div>
+        
+        <div class="example-box">
+            <div class="example-label">例句 Example</div>
+            <div class="example-en">He works as a teacher.</div>
+            <div class="example-cn">他当老师工作。</div>
+        </div>
+    </div>
+    
+    <div class="word-card">
+        <div class="card-number">#10</div>
+        <div class="word-main">
+            <span class="word-text">at</span>
+            <span class="phonetic">/æt/</span>
+        </div>
+        <div class="meaning"><span class="level-badge level-1">Lv.1</span> prep. 在；以；向；朝</div>
+        
+        <div class="audio-row">
+            <button class="btn-audio" onclick="speak('at', 0.55)" ontouchstart="this.onclick(event)">
+                <span class="icon">🔊</span> 单词发音
+            </button>
+            <button class="btn-audio" onclick="speak(`See you at school.`, 0.6)" ontouchstart="this.onclick(event)">
+                <span class="icon">🗣️</span> 例句朗读
+            </button>
+        </div>
+        
+        <div class="example-box">
+            <div class="example-label">例句 Example</div>
+            <div class="example-en">See you at school.</div>
+            <div class="example-cn">学校见。</div>
+        </div>
+    </div>
+    
+</div>
+
+<!-- ===== Friends Scene ===== -->
+<div class="section-title"><span class="emoji">🎬</span> 老友记片段 · Friends Clip</div>
+<div class="friends-section">
+
+    <div class="scene-card" style="margin-bottom: 18px;">
+        <div class="scene-header">
+            <h3>📺 Scene #1 · "a"</h3>
+        </div>
+        <div class="scene-dialogue">Monica: Anyone want **a** coffee?
+Joey: I'll take **a** large one!
+Chandler: Make that two. I need **a** break.</div>
+        <div class="scene-translation">莫妮卡：嘿，有人要来杯咖啡吗？
+乔伊：我要一大杯！
+钱德勒：算我一份。我需要休息一下。</div>
+        <audio id="friends_audio_1" preload="auto">
+            <source src="audio/friends/day001/a_clip.mp3" type="audio/mpeg">
+        </audio>
+        <button class="scene-audio-btn" onclick="playFriendsAudio('friends_audio_1')" ontouchstart="this.onclick(event)">
+            🎬 听老友记原声
+        </button>
+    </div>
+    
+    <div class="scene-card" style="margin-bottom: 18px;">
+        <div class="scene-header">
+            <h3>📺 Scene #2 · "about"</h3>
+        </div>
+        <div class="scene-dialogue">Ross: Let's talk **about** us.
+Rachel: **About** us? What about us?
+Ross: I need to tell you **about** my feelings.
+Rachel: Can we talk **about** this later?</div>
+        <div class="scene-translation">罗斯：我们来谈谈我们之间的事。
+瑞秋：关于我们？什么？
+罗斯：我想告诉你我的感受。
+瑞秋：这事能以后再谈吗？</div>
+        <audio id="friends_audio_2" preload="auto">
+            <source src="audio/friends/day001/about_clip.mp3" type="audio/mpeg">
+        </audio>
+        <button class="scene-audio-btn" onclick="playFriendsAudio('friends_audio_2')" ontouchstart="this.onclick(event)">
+            🎬 听老友记原声
+        </button>
+    </div>
+    
+    <div class="scene-card" style="margin-bottom: 18px;">
+        <div class="scene-header">
+            <h3>📺 Scene #3 · "all"</h3>
+        </div>
+        <div class="scene-dialogue">Phoebe: I invited **all** my friends!
+Ross: All of them? That's fifty people!
+Phoebe: Yeah! The more, the merrier!</div>
+        <div class="scene-translation">菲比：我邀请了我所有的朋友！
+罗斯：所有人？那大概有五十个人！
+菲比：对啊！人越多越热闹嘛！</div>
+        <audio id="friends_audio_3" preload="auto">
+            <source src="audio/friends/day001/all_clip.mp3" type="audio/mpeg">
+        </audio>
+        <button class="scene-audio-btn" onclick="playFriendsAudio('friends_audio_3')" ontouchstart="this.onclick(event)">
+            🎬 听老友记原声
+        </button>
+    </div>
+    
+    <div class="scene-card" style="margin-bottom: 18px;">
+        <div class="scene-header">
+            <h3>📺 Scene #4 · "also"</h3>
+        </div>
+        <div class="scene-dialogue">Chandler: Monica is cooking dinner tonight.
+Joey: Nice! What's she making?
+Chandler: Pasta. She's **also** making garlic bread.
+Joey: I love that woman!</div>
+        <div class="scene-translation">钱德勒：莫妮卡今晚做饭。
+乔伊：太好了！她做什么？
+钱德勒：意面。她还做了蒜香面包。
+乔伊：我爱死她了！</div>
+        <audio id="friends_audio_4" preload="auto">
+            <source src="audio/friends/day001/also_clip.mp3" type="audio/mpeg">
+        </audio>
+        <button class="scene-audio-btn" onclick="playFriendsAudio('friends_audio_4')" ontouchstart="this.onclick(event)">
+            🎬 听老友记原声
+        </button>
+    </div>
+    
+    <div class="scene-card" style="margin-bottom: 18px;">
+        <div class="scene-header">
+            <h3>📺 Scene #5 · "am"</h3>
+        </div>
+        <div class="scene-dialogue">Joey: What time is it?
+Monica: It's eight. Why?
+Joey: I **am** late for my audition!
+Rachel: Good luck, Joey!</div>
+        <div class="scene-translation">乔伊：几点了？
+莫妮卡：八点了。怎么了？
+乔伊：我试镜要迟到了！
+瑞秋：祝你好运，乔伊！</div>
+        <audio id="friends_audio_5" preload="auto">
+            <source src="audio/friends/day001/am_clip.mp3" type="audio/mpeg">
+        </audio>
+        <button class="scene-audio-btn" onclick="playFriendsAudio('friends_audio_5')" ontouchstart="this.onclick(event)">
+            🎬 听老友记原声
+        </button>
+    </div>
+    
+    <div class="scene-card" style="margin-bottom: 18px;">
+        <div class="scene-header">
+            <h3>📺 Scene #6 · "an"</h3>
+        </div>
+        <div class="scene-dialogue">Ross: I have **an** idea!
+Rachel: Every time you say that...
+Ross: This time it's **an** excellent plan!
+Rachel: We'll see about that.</div>
+        <div class="scene-translation">罗斯：我有个主意！
+瑞秋：每次你这么说……
+罗斯：这次是个极好的计划！
+瑞秋：那就走着瞧吧。</div>
+        <audio id="friends_audio_6" preload="auto">
+            <source src="audio/friends/day001/an_clip.mp3" type="audio/mpeg">
+        </audio>
+        <button class="scene-audio-btn" onclick="playFriendsAudio('friends_audio_6')" ontouchstart="this.onclick(event)">
+            🎬 听老友记原声
+        </button>
+    </div>
+    
+    <div class="scene-card" style="margin-bottom: 18px;">
+        <div class="scene-header">
+            <h3>📺 Scene #7 · "and"</h3>
+        </div>
+        <div class="scene-dialogue">Monica: Did you buy the milk **and** eggs?
+Chandler: I got the milk...
+Monica: **And** the eggs?
+Chandler: ...I forgot the eggs.</div>
+        <div class="scene-translation">莫妮卡：你买了牛奶和鸡蛋吗？
+钱德勒：牛奶买了……
+莫妮卡：那鸡蛋呢？
+钱德勒：……我忘了买鸡蛋。</div>
+        <audio id="friends_audio_7" preload="auto">
+            <source src="audio/friends/day001/and_clip.mp3" type="audio/mpeg">
+        </audio>
+        <button class="scene-audio-btn" onclick="playFriendsAudio('friends_audio_7')" ontouchstart="this.onclick(event)">
+            🎬 听老友记原声
+        </button>
+    </div>
+    
+    <div class="scene-card" style="margin-bottom: 18px;">
+        <div class="scene-header">
+            <h3>📺 Scene #8 · "are"</h3>
+        </div>
+        <div class="scene-dialogue">Phoebe: Where **are** we going tonight?
+Rachel: We **are** going to that new restaurant.
+Joey: **are** you sure it's open?
+Monica: They **are** open until eleven.</div>
+        <div class="scene-translation">菲比：我们今晚去哪儿啊？
+瑞秋：我们去那家新餐厅。
+乔伊：确定开着门吗？
+莫妮卡：营业到十一点。</div>
+        <audio id="friends_audio_8" preload="auto">
+            <source src="audio/friends/day001/are_clip.mp3" type="audio/mpeg">
+        </audio>
+        <button class="scene-audio-btn" onclick="playFriendsAudio('friends_audio_8')" ontouchstart="this.onclick(event)">
+            🎬 听老友记原声
+        </button>
+    </div>
+    
+    <div class="scene-card" style="margin-bottom: 18px;">
+        <div class="scene-header">
+            <h3>📺 Scene #9 · "as"</h3>
+        </div>
+        <div class="scene-dialogue">Rachel: You're acting **as** if nothing happened!
+Ross: Well, what do you want me to say?
+Rachel: Don't act **as** cool **as** usual!
+Ross: It's not **as** bad **as** you think.</div>
+        <div class="scene-translation">瑞秋：你表现得好像什么都没发生一样！
+罗斯：那你希望我说什么？
+瑞秋：别跟平时那么淡定！
+罗斯：没你想得那么严重。</div>
+        <audio id="friends_audio_9" preload="auto">
+            <source src="audio/friends/day001/as_clip.mp3" type="audio/mpeg">
+        </audio>
+        <button class="scene-audio-btn" onclick="playFriendsAudio('friends_audio_9')" ontouchstart="this.onclick(event)">
+            🎬 听老友记原声
+        </button>
+    </div>
+    
+    <div class="scene-card" style="margin-bottom: 18px;">
+        <div class="scene-header">
+            <h3>📺 Scene #10 · "at"</h3>
+        </div>
+        <div class="scene-dialogue">Chandler: Look **at** this! My boss wants me to work Saturday!
+Monica: Again? You were **at** the office all week!
+Chandler: He said be **at** work at nine. What can I do?</div>
+        <div class="scene-translation">钱德勒：看看这个！老板要我周六加班！
+莫妮卡：又来？你这周都在公司待着了！
+钱德勒：他说九点到。我能怎么办？</div>
+        <audio id="friends_audio_10" preload="auto">
+            <source src="audio/friends/day001/at_clip.mp3" type="audio/mpeg">
+        </audio>
+        <button class="scene-audio-btn" onclick="playFriendsAudio('friends_audio_10')" ontouchstart="this.onclick(event)">
+            🎬 听老友记原声
+        </button>
+    </div>
+    
+</div>
+
+<!-- ===== Footer ===== -->
+<div class="footer">
+    <p>🎯 基于龙飞虎《6个月学会任何一种外语》方法论 | 1000高频词 = 85%日常沟通</p>
+    <p>Made with ❤️ for 疙瘩汤's English Learning Journey 🐾</p>
+</div>
+
+<script>
+// TTS using Web Speech API (fallback) - 慢速适合学习
+function speak(text, rate = 0.6) {
+    if ('speechSynthesis' in window) {
+        speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'en-US';
+        utterance.rate = rate;
+        utterance.pitch = 1;
+        const voices = speechSynthesis.getVoices();
+        const preferred = voices.find(v => v.name.includes('Jenny') || v.name.includes('Samantha') || v.name.includes('Microsoft Zira') || v.name.includes('Google US'));
+        if (preferred) utterance.voice = preferred;
+        speechSynthesis.speak(utterance);
+    } else {
+        alert('您的浏览器不支持语音合成');
+    }
+}
+
+// 老友记原声播放 - 播放电视剧原声片段
+function playFriendsAudio(audioId) {
+    const audio = document.getElementById(audioId);
+    if (!audio) { alert('音频未就绪'); return; }
+    
+    // 停止其他正在播放的音频
+    document.querySelectorAll('.scene-audio-btn').forEach(btn => {
+        btn.classList.remove('playing');
+        btn.innerHTML = '🎬 听老友记原声';
+    });
+    // 停止TTS
+    if ('speechSynthesis' in window) speechSynthesis.cancel();
+    
+    const btn = audio.parentElement.querySelector('.scene-audio-btn');
+    
+    if (audio.paused || audio.ended) {
+        audio.play().then(() => {
+            btn.classList.add('playing');
+            btn.innerHTML = '⏸ 播放中...';
+        }).catch(e => {
+            // 原声文件不存在时，用TTS慢速朗读对话作为后备
+            console.warn('原声音频不可用，使用TTS后备');
+            const dialogueText = audio.parentElement.querySelector('.scene-dialogue').textContent;
+            speak(dialogueText, 0.55);
+        });
+        
+        audio.onended = () => {
+            btn.classList.remove('playing');
+            btn.innerHTML = '🎬 听老友记原声';
+        };
+    } else {
+        audio.pause();
+        audio.currentTime = 0;
+        btn.classList.remove('playing');
+        btn.innerHTML = '🎬 听老友记原声';
+    }
+}
+
+// Load voices
+if ('speechSynthesis' in window) {
+    speechSynthesis.getVoices();
+    speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
+}
+</script>
+
+</body>
+</html>

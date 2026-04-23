@@ -58,28 +58,37 @@ jobs:
           echo "today=$TODAY" >> $GITHUB_OUTPUT
           echo "📅 Day $DAY_NUM | Date: $TODAY"
 
+      - name: Generate TTS audio for today
+        run: |
+          # 计算当天词的序号范围: day_num对应第(day_num-1)*10+1 到 day_num*10
+          DAY=${{ steps.calc.outputs.day_num }}
+          START=$(( (DAY - 1) * 10 + 1 ))
+          END=$(( DAY * 10 ))
+          echo "🎙️ 生成第 $START ~ $END 词的 TTS 音频..."
+          python scripts/generate_audio.py --start $START --end $END
+        env:
+          PYTHONIOENCODING: utf-8
+
       - name: Generate daily HTML
         run: |
-          cd scripts
-          python generate.py generate ${{ steps.calc.outputs.day_num }} ${{ steps.calc.outputs.today }}
+          python scripts/generate.py generate ${{ steps.calc.outputs.day_num }} ${{ steps.calc.outputs.today }}
         env:
           PYTHONIOENCODING: utf-8
 
-      - name: Generate TTS audio (optional)
-        continue-on-error: true
-        run: |
-          cd scripts
-          python generate_tts.py ${{ steps.calc.outputs.day_num }}
-        env:
-          PYTHONIOENCODING: utf-8
-
-      - name: Push to GitHub Pages / PageDrop
+      - name: Push to GitHub Pages
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           
-          # 添加所有生成的文件
-          git add output/ audio/ || true
+          # 提交 output/(HTML) + 当天音频目录
+          DAY=${{ steps.calc.outputs.day_num }}
+          START=$(( (DAY - 1) * 10 + 1 ))
+          END=$(( DAY * 10 ))
+          for i in $(seq $START $END); do
+            PADDED=$(printf '%04d' $i)
+            git add "audio/tts/$PADDED/" 2>/dev/null || true
+          done
+          git add output/ || true
           
           if git diff --cached --quiet; then
             echo "ℹ️ No changes to commit"
@@ -96,7 +105,7 @@ jobs:
           python scripts/push_notify.py feishu \
             --day ${{ steps.calc.outputs.day_num }} \
             --date ${{ steps.calc.outputs.today }} \
-            --url "https://goodguy2.github.io/high-freq-words/output/high_freq_words_day$(printf '%03d' ${{ steps.calc.outputs.day_num }})_${{ steps.calc.outputs.today }}.html"
+            --url "https://zjunxcr.github.io/high-freq-words/output/high_freq_words_day$(printf '%03d' ${{ steps.calc.outputs.day_num }})_${{ steps.calc.outputs.today }}.html"
         continue-on-error: true
 
       - name: Notify WeChat (微信推送)
