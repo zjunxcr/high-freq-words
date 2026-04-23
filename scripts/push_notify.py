@@ -62,17 +62,23 @@ def send_feishu(webhook_url, title, content, msg_url=""):
         return False
 
 
-def send_wechat(serverchan_key, title, content):
+def send_wechat(serverchan_key, title, content, msg_url=""):
     """通过 Server酱 推送到微信"""
     if not serverchan_key:
         print("[SKIP] SERVERCHAN_KEY not set")
         return False
     
     url = f"https://sctapi.ftqq.com/{serverchan_key}.send"
+    # 构建描述：内容 + 链接按钮
+    desp = content.replace("\n", "\n\n> ")
+    if msg_url:
+        desp += f"\n\n---\n👉 [打开学习页面]({msg_url})"
     data = {
         "title": title,
-        "desp": content.replace("\n", "\n\n> ")
+        "desp": desp
     }
+    if msg_url:
+        data["url"] = msg_url
     
     try:
         resp = requests.post(url, data=data, timeout=10)
@@ -153,7 +159,7 @@ def main():
     if args.channel in ('wechat', 'all'):
         import os
         key = os.environ.get('SERVERCHAN_KEY', '')
-        if not send_wechat(key, title, content):
+        if not send_wechat(key, title, content, args.url):
             success = False
     
     sys.exit(0 if success else 1)
