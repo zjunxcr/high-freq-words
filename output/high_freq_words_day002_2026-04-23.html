@@ -1,0 +1,1376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>高频词汇学习 - Day 2</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+            background: #e8ecf1;
+            background-image: 
+                radial-gradient(at 20% 30%, rgba(102,126,234,0.06) 0%, transparent 50%),
+                radial-gradient(at 80% 70%, rgba(72,187,120,0.06) 0%, transparent 50%);
+            min-height: 100vh;
+            color: #2d3748;
+            padding-bottom: 60px;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 30px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #48bb78 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 60%);
+            animation: shimmer 10s infinite linear;
+        }
+        @keyframes shimmer {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .header h1 {
+            font-size: 26px;
+            color: #fff;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            position: relative;
+        }
+        .header .subtitle {
+            font-size: 14px;
+            color: rgba(255,255,255,0.9);
+            position: relative;
+        }
+        .progress-bar {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            position: relative;
+        }
+        .progress-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.35);
+            transition: all 0.3s;
+        }
+        .progress-dot.done { background: #fff; box-shadow: 0 0 6px rgba(255,255,255,0.6); }
+        .progress-dot.current { background: #fdd835; box-shadow: 0 0 8px #fdd835; animation: pulse 1.5s infinite; }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+        }
+
+        /* Word Cards Section */
+        .section-title {
+            text-align: center;
+            font-size: 20px;
+            font-weight: 600;
+            color: #2d3748;
+            margin: 30px 20px 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .section-title .emoji { font-size: 24px; }
+
+        .cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 18px;
+            padding: 0 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .word-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 22px;
+            border: 1px solid #dde4ed;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+            position: relative;
+            overflow: hidden;
+        }
+        .word-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 28px rgba(102,126,234,0.15);
+            border-color: #a3bffa;
+        }
+        .word-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #667eea, #48bb78, #ed8936);
+        }
+        .card-number {
+            position: absolute;
+            top: 12px;
+            right: 15px;
+            font-size: 11px;
+            color: #a0aec0;
+            font-weight: 600;
+        }
+
+        .word-main {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+        }
+        .word-text {
+            font-size: 28px;
+            font-weight: 700;
+            color: #5a67d8;
+            letter-spacing: 0.5px;
+        }
+        .phonetic {
+            font-size: 15px;
+            color: #718096;
+            font-family: "Lucida Sans Unicode", "Arial Unicode MS", sans-serif;
+        }
+        .meaning {
+            font-size: 15px;
+            color: #4a5568;
+            margin-bottom: 12px;
+            line-height: 1.55;
+        }
+        .level-badge {
+            display: inline-block;
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-right: 6px;
+            font-weight: 600;
+        }
+        .level-1 { background: #ebf8ff; color: #2b6cb0; border: 1px solid #bee3f8; }
+        .level-2 { background: #faf5ff; color: #6b46c1; border: 1px solid #e9d8fd; }
+        .level-3 { background: #fffff0; color: #b7791f; border: 1px solid #fefcbf; }
+
+        /* Audio Buttons */
+        .audio-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+        .btn-audio {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 1px solid #e2e8f0;
+            background: #f7fafc;
+            color: #4a5568;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .btn-audio:hover {
+            background: #eef2ff;
+            border-color: #667eea;
+            color: #5a67d8;
+        }
+        .btn-audio.playing {
+            background: #667eea;
+            border-color: #667eea;
+            color: #fff;
+            animation: glow-light 1s ease-in-out infinite alternate;
+        }
+        @keyframes glow-light {
+            from { box-shadow: 0 0 5px rgba(102,126,234,0.3); }
+            to { box-shadow: 0 0 15px rgba(102,126,234,0.25), 0 0 25px rgba(102,126,234,0.15); }
+        }
+        .btn-audio .icon { font-size: 14px; }
+
+        /* Example Sentence */
+        .example-box {
+            background: #f7fafc;
+            border-radius: 10px;
+            padding: 12px 14px;
+            margin-top: 10px;
+            border: 1px solid #edf2f7;
+        }
+        .example-label {
+            font-size: 11px;
+            color: #a0aec0;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+        .example-en {
+            font-size: 15px;
+            color: #2d3748;
+            line-height: 1.6;
+            margin-bottom: 4px;
+        }
+        .example-cn {
+            font-size: 13px;
+            color: #718096;
+            line-height: 1.5;
+        }
+
+        /* Friends Scene */
+        .friends-section {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        .scene-card {
+            background: #fff;
+            border-radius: 18px;
+            padding: 25px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            position: relative;
+            overflow: visible;
+            margin-bottom: 20px;
+        }
+        .scene-card::after {
+            content: '\2615';
+            position: absolute;
+            bottom: -10px;
+            right: -10px;
+            font-size: 80px;
+            opacity: 0.06;
+            pointer-events: none;
+        }
+        .scene-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        .scene-header h3 {
+            font-size: 18px;
+            color: #dd6b20;
+            margin: 0;
+        }
+        .ep-badge {
+            font-size: 12px;
+            color: #fff;
+            background: linear-gradient(90deg,#00a1d6,#fb7299);
+            border-radius: 20px;
+            padding: 2px 10px;
+        }
+        .scene-dialogue {
+            background: #fffaf0;
+            border-left: 3px solid #ed8936;
+            border-radius: 0 10px 10px 0;
+            padding: 14px 18px;
+            margin: 10px 0;
+            font-style: italic;
+            font-size: 17px;
+            line-height: 1.7;
+            color: #2d3748;
+        }
+        .scene-translation {
+            color: #718096;
+            font-size: 14px;
+            margin-top: 8px;
+            padding-left: 12px;
+            border-left: 2px solid #e2e8f0;
+            margin-bottom: 14px;
+        }
+        /* Bilibili player bar */
+        .bili-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 4px;
+        }
+        .btn-bili {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 22px;
+            border-radius: 25px;
+            border: none;
+            background: linear-gradient(135deg, #00a1d6, #fb7299);
+            color: #fff;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s;
+            user-select: none;
+        }
+        .btn-bili:hover { transform: scale(1.03); box-shadow: 0 5px 18px rgba(0,161,214,.35); }
+        .btn-bili.open  { background: linear-gradient(135deg, #fb7299, #ff6b6b); }
+        .btn-bili-fallback {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 34px; height: 34px;
+            border-radius: 50%;
+            border: 1.5px solid #cbd5e0;
+            color: #718096;
+            font-size: 16px;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .btn-bili-fallback:hover { border-color: #00a1d6; color: #00a1d6; }
+        /* Embedded player */
+        .bili-player {
+            margin-top: 14px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid #e2e8f0;
+            background: #000;
+            animation: fadeSlide 0.3s ease;
+            position: relative;
+        }
+        @keyframes fadeSlide {
+            from { opacity: 0; transform: translateY(-8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .bili-player iframe {
+            width: 100%;
+            height: 260px;
+            display: block;
+            border: none;
+        }
+        .player-loading, .player-fail {
+            text-align: center;
+            padding: 40px 20px;
+            color: #a0aec0;
+            font-size: 14px;
+            background: #1a1a2e;
+            color: #a0aec0;
+        }
+        .btn-open-bili {
+            display: inline-block;
+            margin-top: 12px;
+            padding: 8px 20px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, #00a1d6, #fb7299);
+            color: #fff;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 25px;
+            color: #a0aec0;
+            font-size: 13px;
+            margin-top: 40px;
+        }
+        .footer a { color: #667eea; text-decoration: none; }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .header h1 { font-size: 20px; }
+            .word-text { font-size: 24px; }
+            .cards-container { grid-template-columns: 1fr; }
+            .scene-dialogue { font-size: 15px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ===== Header ===== -->
+<div class="header">
+    <h1>📚 1000 High-Frequency Words</h1>
+    <div class="subtitle">Day 2 · 第11-20词 · 2026-04-23</div>
+    <div class="progress-bar">
+        <div class="progress-dot done"></div>
+<div class="progress-dot current"></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+<div class="progress-dot "></div>
+    </div>
+</div>
+
+<!-- ===== Word Cards ===== -->
+<div class="section-title"><span class="emoji">📝</span> 今日单词</div>
+<div class="cards-container">
+
+    <div class="word-card">
+        <div class="card-number">#11</div>
+        <div class="word-main">
+            <span class="word-text">after</span>
+            <span class="phonetic">/ˈɑːftər/</span>
+        </div>
+        <div class="meaning"><span class="level-badge level-1">Lv.1</span> prep./conj. 在……之后</div>
+        
+        <div class="audio-row">
+            
+            <button class="btn-audio btn-audio-tts" onclick="playLocalAudio('w_11_audio')" ontouchstart="this.onclick(event)" id="w_11_audio_btn">
+                <span class="icon">🔊</span> 单词发音
+            </button>
+            <audio id="w_11_audio" preload="auto"><source src="audio/tts/0011/word.mp3" type="audio/mpeg"></audio>
+            
+            <button class="btn-audio btn-audio-tts" onclick="playLocalAudio('s_11_audio')" ontouchstart="this.onclick(event)" id="s_11_audio_btn">
+                <span class="icon">🗣️</span> 例句朗读
+            </button>
+            <audio id="s_11_audio" preload="auto"><source src="audio/tts/0011/sentence.mp3" type="audio/mpeg"></audio>
+        </div>
+        
+        <div class="example-box">
+            <div class="example-label">例句 Example</div>
+            <div class="example-en">I need to after this right now.</div>
+            <div class="example-cn">我现在需要prep./在……之后这件事。</div>
+        </div>
+    </div>
+    
+    <div class="word-card">
+        <div class="card-number">#12</div>
+        <div class="word-main">
+            <span class="word-text">again</span>
+            <span class="phonetic">/əˈɡen/</span>
+        </div>
+        <div class="meaning"><span class="level-badge level-1">Lv.1</span> adv. 再次；又；另外</div>
+        
+        <div class="audio-row">
+            
+            <button class="btn-audio btn-audio-tts" onclick="playLocalAudio('w_12_audio')" ontouchstart="this.onclick(event)" id="w_12_audio_btn">
+                <span class="icon">🔊</span> 单词发音
+            </button>
+            <audio id="w_12_audio" preload="auto"><source src="audio/tts/0012/word.mp3" type="audio/mpeg"></audio>
+            
+            <button class="btn-audio btn-audio-tts" onclick="playLocalAudio('s_12_audio')" ontouchstart="this.onclick(event)" id="s_12_audio_btn">
+                <span class="icon">🗣️</span> 例句朗读
+            </button>
+            <audio id="s_12_audio" preload="auto"><source src="audio/tts/0012/sentence.mp3" type="audio/mpeg"></audio>
+        </div>
+        
+        <div class="example-box">
+            <div class="example-label">例句 Example</div>
+            <div class="example-en">I need to again this right now.</div>
+            <div class="example-cn">我现在需要ad再次这件事。</div>
+        </div>
+    </div>
+    
+    <div class="word-card">
+        <div class="card-number">#13</div>
+        <div class="word-main">
+            <span class="word-text">age</span>
+            <span class="phonetic">/eɪdʒ/</span>
+        </div>
+        <div class="meaning"><span class="level-badge level-1">Lv.1</span> n./v. 年龄；时代；老化</div>
+        
+        <div class="audio-row">
+            
+            <button class="btn-audio btn-audio-tts" onclick="playLocalAudio('w_13_audio')" ontouchstart="this.onclick(event)" id="w_13_audio_btn">
+                <span class="icon">🔊</span> 单词发音
+            </button>
+            <audio id="w_13_audio" preload="auto"><source src="audio/tts/0013/word.mp3" type="audio/mpeg"></audio>
+            
+            <button class="btn-audio btn-audio-tts" onclick="playLocalAudio('s_13_audio')" ontouchstart="this.onclick(event)" id="s_13_audio_btn">
+                <span class="icon">🗣️</span> 例句朗读
+            </button>
+            <audio id="s_13_audio" preload="auto"><source src="audio/tts/0013/sentence.mp3" type="audio/mpeg"></audio>
+        </div>
+        
+        <div class="example-box">
+            <div class="example-label">例句 Example</div>
+            <div class="example-en">I need to age this right now.</div>
+            <div class="example-cn">我现在需要n./年龄这件事。</div>
+        </div>
+    </div>
+    
+    <div class="word-card">
+        <div class="card-number">#14</div>
+        <div class="word-main">
+            <span class="word-text">ago</span>
+            <span class="phonetic">/əˈɡəʊ/</span>
+        </div>
+        <div class="meaning"><span class="level-badge level-1">Lv.1</span> adv. 以前；...前</div>
+        
+        <div class="audio-row">
+            
+            <button class="btn-audio btn-audio-tts" onclick="playLocalAudio('w_14_audio')" ontouchstart="this.onclick(event)" id="w_14_audio_btn">
+                <span class="icon">🔊</span> 单词发音
+            </button>
+            <audio id="w_14_audio" preload="auto"><source src="audio/tts/0014/word.mp3" type="audio/mpeg"></audio>
+            
+            <button class="btn-audio btn-audio-tts" onclick="playLocalAudio('s_14_audio')" ontouchstart="this.onclick(event)" id="s_14_audio_btn">
+                <span class="icon">🗣️</span> 例句朗读
+            </button>
+            <audio id="s_14_audio" preload="auto"><source src="audio/tts/0014/sentence.mp3" type="audio/mpeg"></audio>
+        </div>
+        
+        <div class="example-box">
+            <div class="example-label">例句 Example</div>
+            <div class="example-en">I need to ago this right now.</div>
+            <div class="example-cn">我现在需要ad以前这件事。</div>
+        </div>
+    </div>
+    
+    <div class="word-card">
+        <div class="card-number">#15</div>
+        <div class="word-main">
+            <span class="word-text">agree</span>
+            <span class="phonetic">/əˈɡriː/</span>
+        </div>
+        <div class="meaning"><span class="level-badge level-1">Lv.1</span> v. 同意；赞成；一致</div>
+        
+        <div class="audio-row">
+            
+            <button class="btn-audio btn-audio-tts" onclick="playLocalAudio('w_15_audio')" ontouchstart="this.onclick(event)" id="w_15_audio_btn">
+                <span class="icon">🔊</span> 单词发音
+            </button>
+            <audio id="w_15_audio" preload="auto"><source src="audio/tts/0015/word.mp3" type="audio/mpeg"></audio>
+            
+            <button class="btn-audio btn-audio-tts" onclick="playLocalAudio('s_15_audio')" ontouchstart="this.onclick(event)" id="s_15_audio_btn">
+                <span class="icon">🗣️</span> 例句朗读
+            </button>
+            <audio id="s_15_audio" preload="auto"><source src="audio/tts/0015/sentence.mp3" type="audio/mpeg"></audio>
+        </div>
+        
+        <div class="example-box">
+            <div class="example-label">例句 Example</div>
+            <div class="example-en">I need to agree this right now.</div>
+            <div class="example-cn">我现在需要同意这件事。</div>
+        </div>
+    </div>
+    
+    <div class="word-card">
+        <div class="card-number">#16</div>
+        <div class="word-main">
+            <span class="word-text">air</span>
+            <span class="phonetic">/eər/</span>
+        </div>
+        <div class="meaning"><span class="level-badge level-1">Lv.1</span> n. 空气；气氛；曲调</div>
+        
+        <div class="audio-row">
+            
+            <button class="btn-audio btn-audio-tts" onclick="playLocalAudio('w_16_audio')" ontouchstart="this.onclick(event)" id="w_16_audio_btn">
+                <span class="icon">🔊</span> 单词发音
+            </button>
+            <audio id="w_16_audio" preload="auto"><source src="audio/tts/0016/word.mp3" type="audio/mpeg"></audio>
+            
+            <button class="btn-audio btn-audio-tts" onclick="playLocalAudio('s_16_audio')" ontouchstart="this.onclick(event)" id="s_16_audio_btn">
+                <span class="icon">🗣️</span> 例句朗读
+            </button>
+            <audio id="s_16_audio" preload="auto"><source src="audio/tts/0016/sentence.mp3" type="audio/mpeg"></audio>
+        </div>
+        
+        <div class="example-box">
+            <div class="example-label">例句 Example</div>
+            <div class="example-en">I need to air this right now.</div>
+            <div class="example-cn">我现在需要空气这件事。</div>
+        </div>
+    </div>
+    
+    <div class="word-card">
+        <div class="card-number">#17</div>
+        <div class="word-main">
+            <span class="word-text">all</span>
+            <span class="phonetic">/ɔːl/</span>
+        </div>
+        <div class="meaning"><span class="level-badge level-1">Lv.1</span> adj. 所有的；全部的 pron. 全部</div>
+        
+        <div class="audio-row">
+            
+            <button class="btn-audio btn-audio-tts" onclick="playLocalAudio('w_17_audio')" ontouchstart="this.onclick(event)" id="w_17_audio_btn">
+                <span class="icon">🔊</span> 单词发音
+            </button>
+            <audio id="w_17_audio" preload="auto"><source src="audio/tts/0017/word.mp3" type="audio/mpeg"></audio>
+            
+            <button class="btn-audio btn-audio-tts" onclick="playLocalAudio('s_17_audio')" ontouchstart="this.onclick(event)" id="s_17_audio_btn">
+                <span class="icon">🗣️</span> 例句朗读
+            </button>
+            <audio id="s_17_audio" preload="auto"><source src="audio/tts/0017/sentence.mp3" type="audio/mpeg"></audio>
+        </div>
+        
+        <div class="example-box">
+            <div class="example-label">例句 Example</div>
+            <div class="example-en">All my friends are here.</div>
+            <div class="example-cn">我所有的朋友都在这儿。</div>
+        </div>
+    </div>
+    
+    <div class="word-card">
+        <div class="card-number">#18</div>
+        <div class="word-main">
+            <span class="word-text">all right</span>
+            <span class="phonetic">/ɔːl raɪt/</span>
+        </div>
+        <div class="meaning"><span class="level-badge level-1">Lv.1</span> phrase 好吧；行</div>
+        
+        <div class="audio-row">
+            
+            <button class="btn-audio btn-audio-tts" onclick="playLocalAudio('w_18_audio')" ontouchstart="this.onclick(event)" id="w_18_audio_btn">
+                <span class="icon">🔊</span> 单词发音
+            </button>
+            <audio id="w_18_audio" preload="auto"><source src="audio/tts/0018/word.mp3" type="audio/mpeg"></audio>
+            
+            <button class="btn-audio btn-audio-tts" onclick="playLocalAudio('s_18_audio')" ontouchstart="this.onclick(event)" id="s_18_audio_btn">
+                <span class="icon">🗣️</span> 例句朗读
+            </button>
+            <audio id="s_18_audio" preload="auto"><source src="audio/tts/0018/sentence.mp3" type="audio/mpeg"></audio>
+        </div>
+        
+        <div class="example-box">
+            <div class="example-label">例句 Example</div>
+            <div class="example-en">I want to learn how to use 'all right' correctly.</div>
+            <div class="example-cn">我想学习如何正确使用'all right'。</div>
+        </div>
+    </div>
+    
+    <div class="word-card">
+        <div class="card-number">#19</div>
+        <div class="word-main">
+            <span class="word-text">allow</span>
+            <span class="phonetic">/əˈlaʊ/</span>
+        </div>
+        <div class="meaning"><span class="level-badge level-1">Lv.1</span> v. 允许；许可；给予</div>
+        
+        <div class="audio-row">
+            
+            <button class="btn-audio btn-audio-tts" onclick="playLocalAudio('w_19_audio')" ontouchstart="this.onclick(event)" id="w_19_audio_btn">
+                <span class="icon">🔊</span> 单词发音
+            </button>
+            <audio id="w_19_audio" preload="auto"><source src="audio/tts/0019/word.mp3" type="audio/mpeg"></audio>
+            
+            <button class="btn-audio btn-audio-tts" onclick="playLocalAudio('s_19_audio')" ontouchstart="this.onclick(event)" id="s_19_audio_btn">
+                <span class="icon">🗣️</span> 例句朗读
+            </button>
+            <audio id="s_19_audio" preload="auto"><source src="audio/tts/0019/sentence.mp3" type="audio/mpeg"></audio>
+        </div>
+        
+        <div class="example-box">
+            <div class="example-label">例句 Example</div>
+            <div class="example-en">I want to learn how to use 'allow' correctly.</div>
+            <div class="example-cn">我想学习如何正确使用'allow'。</div>
+        </div>
+    </div>
+    
+    <div class="word-card">
+        <div class="card-number">#20</div>
+        <div class="word-main">
+            <span class="word-text">almost</span>
+            <span class="phonetic">/ˈɔːlməʊst/</span>
+        </div>
+        <div class="meaning"><span class="level-badge level-1">Lv.1</span> adv. 几乎；差不多</div>
+        
+        <div class="audio-row">
+            
+            <button class="btn-audio btn-audio-tts" onclick="playLocalAudio('w_20_audio')" ontouchstart="this.onclick(event)" id="w_20_audio_btn">
+                <span class="icon">🔊</span> 单词发音
+            </button>
+            <audio id="w_20_audio" preload="auto"><source src="audio/tts/0020/word.mp3" type="audio/mpeg"></audio>
+            
+            <button class="btn-audio btn-audio-tts" onclick="playLocalAudio('s_20_audio')" ontouchstart="this.onclick(event)" id="s_20_audio_btn">
+                <span class="icon">🗣️</span> 例句朗读
+            </button>
+            <audio id="s_20_audio" preload="auto"><source src="audio/tts/0020/sentence.mp3" type="audio/mpeg"></audio>
+        </div>
+        
+        <div class="example-box">
+            <div class="example-label">例句 Example</div>
+            <div class="example-en">I need to almost this right now.</div>
+            <div class="example-cn">我现在需要ad几乎这件事。</div>
+        </div>
+    </div>
+    
+</div>
+
+<!-- ===== Friends Scene ===== -->
+<div class="section-title"><span class="emoji">🎬</span> 老友记片段 · Friends Clip</div>
+<div class="friends-section">
+
+    <div class="scene-card" id="scene_11">
+        <div class="scene-header">
+            <h3>&#127916; Scene #11 &middot; &ldquo;after&rdquo;</h3>
+            <span class="ep-badge">Friends S01E02-P1</span>
+        </div>
+        <div class="scene-dialogue">Ross: Did you just say "after"?
+Chandler: I say "after" all the time. It means prep./conj. 在……之后.
+Monica: You guys, stop debating and come eat!</div>
+        <div class="scene-translation">罗斯：你刚才说的是"after"吗？
+钱德勒：我一直说"after"。意思是prep./conj. 在……之后。
+莫妮卡：你们，别争了，来吃饭吧！</div>
+
+        <div class="bili-bar">
+            <button id="bili_btn_11" class="btn-bili" onclick="togglePlayer('bili_player_11','bili_btn_11','bili_iframe_11','https://player.bilibili.com/player.html?bvid=BV1pyRsYHEVa&page=11&autoplay=0&high_quality=1&danmaku=0')">
+                &#127916; 老友记原声片段
+            </button>
+            <a href="https://www.bilibili.com/video/BV1pyRsYHEVa?p=11" target="_blank" class="btn-bili-fallback" title="在B站打开">&#8599;</a>
+        </div>
+
+        <div id="bili_player_11" class="bili-player" style="display:none;">
+            <div class="player-loading" id="loading_11">⏳ 加载中...</div>
+            <iframe id="bili_iframe_11"
+                    src="about:blank"
+                    data-src="https://player.bilibili.com/player.html?bvid=BV1pyRsYHEVa&page=11&autoplay=0&high_quality=1&danmaku=0"
+                    scrolling="no"
+                    frameborder="0"
+                    allowfullscreen="true"
+                    allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+                    referrerpolicy="no-referrer-when-downgrade"
+                    style="display:none;"
+                    onload="onIframeLoad(this, 'loading_11')">
+            </iframe>
+            <div id="fail_11" class="player-fail" style="display:none;">
+                &#128529; 视频无法嵌入（网络或浏览器限制）<br>
+                <a href="https://www.bilibili.com/video/BV1pyRsYHEVa?p=11" target="_blank" class="btn-open-bili">&#127916; 去B站看原声</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="scene-card" id="scene_12">
+        <div class="scene-header">
+            <h3>&#127916; Scene #12 &middot; &ldquo;again&rdquo;</h3>
+            <span class="ep-badge">Friends S01E02-P2</span>
+        </div>
+        <div class="scene-dialogue">Ross: Did you just say "again"?
+Chandler: I say "again" all the time. It means adv. 再次.
+Monica: You guys, stop debating and come eat!</div>
+        <div class="scene-translation">罗斯：你刚才说的是"again"吗？
+钱德勒：我一直说"again"。意思是ad再次。
+莫妮卡：你们，别争了，来吃饭吧！</div>
+
+        <div class="bili-bar">
+            <button id="bili_btn_12" class="btn-bili" onclick="togglePlayer('bili_player_12','bili_btn_12','bili_iframe_12','https://player.bilibili.com/player.html?bvid=BV1pyRsYHEVa&page=12&autoplay=0&high_quality=1&danmaku=0')">
+                &#127916; 老友记原声片段
+            </button>
+            <a href="https://www.bilibili.com/video/BV1pyRsYHEVa?p=12" target="_blank" class="btn-bili-fallback" title="在B站打开">&#8599;</a>
+        </div>
+
+        <div id="bili_player_12" class="bili-player" style="display:none;">
+            <div class="player-loading" id="loading_12">⏳ 加载中...</div>
+            <iframe id="bili_iframe_12"
+                    src="about:blank"
+                    data-src="https://player.bilibili.com/player.html?bvid=BV1pyRsYHEVa&page=12&autoplay=0&high_quality=1&danmaku=0"
+                    scrolling="no"
+                    frameborder="0"
+                    allowfullscreen="true"
+                    allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+                    referrerpolicy="no-referrer-when-downgrade"
+                    style="display:none;"
+                    onload="onIframeLoad(this, 'loading_12')">
+            </iframe>
+            <div id="fail_12" class="player-fail" style="display:none;">
+                &#128529; 视频无法嵌入（网络或浏览器限制）<br>
+                <a href="https://www.bilibili.com/video/BV1pyRsYHEVa?p=12" target="_blank" class="btn-open-bili">&#127916; 去B站看原声</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="scene-card" id="scene_13">
+        <div class="scene-header">
+            <h3>&#127916; Scene #13 &middot; &ldquo;age&rdquo;</h3>
+            <span class="ep-badge">Friends S01E02-P3</span>
+        </div>
+        <div class="scene-dialogue">Ross: Did you just say "age"?
+Chandler: I say "age" all the time. It means n./v. 年龄.
+Monica: You guys, stop debating and come eat!</div>
+        <div class="scene-translation">罗斯：你刚才说的是"age"吗？
+钱德勒：我一直说"age"。意思是n./年龄。
+莫妮卡：你们，别争了，来吃饭吧！</div>
+
+        <div class="bili-bar">
+            <button id="bili_btn_13" class="btn-bili" onclick="togglePlayer('bili_player_13','bili_btn_13','bili_iframe_13','https://player.bilibili.com/player.html?bvid=BV1pyRsYHEVa&page=13&autoplay=0&high_quality=1&danmaku=0')">
+                &#127916; 老友记原声片段
+            </button>
+            <a href="https://www.bilibili.com/video/BV1pyRsYHEVa?p=13" target="_blank" class="btn-bili-fallback" title="在B站打开">&#8599;</a>
+        </div>
+
+        <div id="bili_player_13" class="bili-player" style="display:none;">
+            <div class="player-loading" id="loading_13">⏳ 加载中...</div>
+            <iframe id="bili_iframe_13"
+                    src="about:blank"
+                    data-src="https://player.bilibili.com/player.html?bvid=BV1pyRsYHEVa&page=13&autoplay=0&high_quality=1&danmaku=0"
+                    scrolling="no"
+                    frameborder="0"
+                    allowfullscreen="true"
+                    allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+                    referrerpolicy="no-referrer-when-downgrade"
+                    style="display:none;"
+                    onload="onIframeLoad(this, 'loading_13')">
+            </iframe>
+            <div id="fail_13" class="player-fail" style="display:none;">
+                &#128529; 视频无法嵌入（网络或浏览器限制）<br>
+                <a href="https://www.bilibili.com/video/BV1pyRsYHEVa?p=13" target="_blank" class="btn-open-bili">&#127916; 去B站看原声</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="scene-card" id="scene_14">
+        <div class="scene-header">
+            <h3>&#127916; Scene #14 &middot; &ldquo;ago&rdquo;</h3>
+            <span class="ep-badge">Friends S01E02-P4</span>
+        </div>
+        <div class="scene-dialogue">Ross: Did you just say "ago"?
+Chandler: I say "ago" all the time. It means adv. 以前.
+Monica: You guys, stop debating and come eat!</div>
+        <div class="scene-translation">罗斯：你刚才说的是"ago"吗？
+钱德勒：我一直说"ago"。意思是ad以前。
+莫妮卡：你们，别争了，来吃饭吧！</div>
+
+        <div class="bili-bar">
+            <button id="bili_btn_14" class="btn-bili" onclick="togglePlayer('bili_player_14','bili_btn_14','bili_iframe_14','https://player.bilibili.com/player.html?bvid=BV1pyRsYHEVa&page=14&autoplay=0&high_quality=1&danmaku=0')">
+                &#127916; 老友记原声片段
+            </button>
+            <a href="https://www.bilibili.com/video/BV1pyRsYHEVa?p=14" target="_blank" class="btn-bili-fallback" title="在B站打开">&#8599;</a>
+        </div>
+
+        <div id="bili_player_14" class="bili-player" style="display:none;">
+            <div class="player-loading" id="loading_14">⏳ 加载中...</div>
+            <iframe id="bili_iframe_14"
+                    src="about:blank"
+                    data-src="https://player.bilibili.com/player.html?bvid=BV1pyRsYHEVa&page=14&autoplay=0&high_quality=1&danmaku=0"
+                    scrolling="no"
+                    frameborder="0"
+                    allowfullscreen="true"
+                    allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+                    referrerpolicy="no-referrer-when-downgrade"
+                    style="display:none;"
+                    onload="onIframeLoad(this, 'loading_14')">
+            </iframe>
+            <div id="fail_14" class="player-fail" style="display:none;">
+                &#128529; 视频无法嵌入（网络或浏览器限制）<br>
+                <a href="https://www.bilibili.com/video/BV1pyRsYHEVa?p=14" target="_blank" class="btn-open-bili">&#127916; 去B站看原声</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="scene-card" id="scene_15">
+        <div class="scene-header">
+            <h3>&#127916; Scene #15 &middot; &ldquo;agree&rdquo;</h3>
+            <span class="ep-badge">Friends S01E02-P5</span>
+        </div>
+        <div class="scene-dialogue">Ross: Did you just say "agree"?
+Chandler: I say "agree" all the time. It means v. 同意.
+Monica: You guys, stop debating and come eat!</div>
+        <div class="scene-translation">罗斯：你刚才说的是"agree"吗？
+钱德勒：我一直说"agree"。意思是同意。
+莫妮卡：你们，别争了，来吃饭吧！</div>
+
+        <div class="bili-bar">
+            <button id="bili_btn_15" class="btn-bili" onclick="togglePlayer('bili_player_15','bili_btn_15','bili_iframe_15','https://player.bilibili.com/player.html?bvid=BV1pyRsYHEVa&page=15&autoplay=0&high_quality=1&danmaku=0')">
+                &#127916; 老友记原声片段
+            </button>
+            <a href="https://www.bilibili.com/video/BV1pyRsYHEVa?p=15" target="_blank" class="btn-bili-fallback" title="在B站打开">&#8599;</a>
+        </div>
+
+        <div id="bili_player_15" class="bili-player" style="display:none;">
+            <div class="player-loading" id="loading_15">⏳ 加载中...</div>
+            <iframe id="bili_iframe_15"
+                    src="about:blank"
+                    data-src="https://player.bilibili.com/player.html?bvid=BV1pyRsYHEVa&page=15&autoplay=0&high_quality=1&danmaku=0"
+                    scrolling="no"
+                    frameborder="0"
+                    allowfullscreen="true"
+                    allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+                    referrerpolicy="no-referrer-when-downgrade"
+                    style="display:none;"
+                    onload="onIframeLoad(this, 'loading_15')">
+            </iframe>
+            <div id="fail_15" class="player-fail" style="display:none;">
+                &#128529; 视频无法嵌入（网络或浏览器限制）<br>
+                <a href="https://www.bilibili.com/video/BV1pyRsYHEVa?p=15" target="_blank" class="btn-open-bili">&#127916; 去B站看原声</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="scene-card" id="scene_16">
+        <div class="scene-header">
+            <h3>&#127916; Scene #16 &middot; &ldquo;air&rdquo;</h3>
+            <span class="ep-badge">Friends S01E02-P6</span>
+        </div>
+        <div class="scene-dialogue">Ross: Did you just say "air"?
+Chandler: I say "air" all the time. It means n. 空气.
+Monica: You guys, stop debating and come eat!</div>
+        <div class="scene-translation">罗斯：你刚才说的是"air"吗？
+钱德勒：我一直说"air"。意思是空气。
+莫妮卡：你们，别争了，来吃饭吧！</div>
+
+        <div class="bili-bar">
+            <button id="bili_btn_16" class="btn-bili" onclick="togglePlayer('bili_player_16','bili_btn_16','bili_iframe_16','https://player.bilibili.com/player.html?bvid=BV1pyRsYHEVa&page=16&autoplay=0&high_quality=1&danmaku=0')">
+                &#127916; 老友记原声片段
+            </button>
+            <a href="https://www.bilibili.com/video/BV1pyRsYHEVa?p=16" target="_blank" class="btn-bili-fallback" title="在B站打开">&#8599;</a>
+        </div>
+
+        <div id="bili_player_16" class="bili-player" style="display:none;">
+            <div class="player-loading" id="loading_16">⏳ 加载中...</div>
+            <iframe id="bili_iframe_16"
+                    src="about:blank"
+                    data-src="https://player.bilibili.com/player.html?bvid=BV1pyRsYHEVa&page=16&autoplay=0&high_quality=1&danmaku=0"
+                    scrolling="no"
+                    frameborder="0"
+                    allowfullscreen="true"
+                    allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+                    referrerpolicy="no-referrer-when-downgrade"
+                    style="display:none;"
+                    onload="onIframeLoad(this, 'loading_16')">
+            </iframe>
+            <div id="fail_16" class="player-fail" style="display:none;">
+                &#128529; 视频无法嵌入（网络或浏览器限制）<br>
+                <a href="https://www.bilibili.com/video/BV1pyRsYHEVa?p=16" target="_blank" class="btn-open-bili">&#127916; 去B站看原声</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="scene-card" id="scene_17">
+        <div class="scene-header">
+            <h3>&#127916; Scene #17 &middot; &ldquo;all&rdquo;</h3>
+            <span class="ep-badge">Friends S01E02-P7</span>
+        </div>
+        <div class="scene-dialogue">Phoebe: I invited **all** my friends!
+Ross: All of them? That's fifty people!
+Phoebe: Yeah! The more, the merrier!</div>
+        <div class="scene-translation">菲比：我邀请了我所有的朋友！
+罗斯：所有人？那大概有五十个人！
+菲比：对啊！人越多越热闹嘛！</div>
+
+        <div class="bili-bar">
+            <button id="bili_btn_17" class="btn-bili" onclick="togglePlayer('bili_player_17','bili_btn_17','bili_iframe_17','https://player.bilibili.com/player.html?bvid=BV1pyRsYHEVa&page=17&autoplay=0&high_quality=1&danmaku=0')">
+                &#127916; 老友记原声片段
+            </button>
+            <a href="https://www.bilibili.com/video/BV1pyRsYHEVa?p=17" target="_blank" class="btn-bili-fallback" title="在B站打开">&#8599;</a>
+        </div>
+
+        <div id="bili_player_17" class="bili-player" style="display:none;">
+            <div class="player-loading" id="loading_17">⏳ 加载中...</div>
+            <iframe id="bili_iframe_17"
+                    src="about:blank"
+                    data-src="https://player.bilibili.com/player.html?bvid=BV1pyRsYHEVa&page=17&autoplay=0&high_quality=1&danmaku=0"
+                    scrolling="no"
+                    frameborder="0"
+                    allowfullscreen="true"
+                    allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+                    referrerpolicy="no-referrer-when-downgrade"
+                    style="display:none;"
+                    onload="onIframeLoad(this, 'loading_17')">
+            </iframe>
+            <div id="fail_17" class="player-fail" style="display:none;">
+                &#128529; 视频无法嵌入（网络或浏览器限制）<br>
+                <a href="https://www.bilibili.com/video/BV1pyRsYHEVa?p=17" target="_blank" class="btn-open-bili">&#127916; 去B站看原声</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="scene-card" id="scene_18">
+        <div class="scene-header">
+            <h3>&#127916; Scene #18 &middot; &ldquo;all right&rdquo;</h3>
+            <span class="ep-badge">Friends S01E02-P8</span>
+        </div>
+        <div class="scene-dialogue">Rachel: Have you heard about "all right"?
+Joey: Yeah! It means 好吧.
+Chandler: Joey knows everything about "all right".
+Monica: Can we just order some food and stop talking about grammar?</div>
+        <div class="scene-translation">瑞秋：你听说过"all right"吗？
+乔伊：当然！意思是好吧。
+钱德勒：乔伊什么都知道。
+莫妮卡：我们能先点菜吗？别再讨论语法了。</div>
+
+        <div class="bili-bar">
+            <button id="bili_btn_18" class="btn-bili" onclick="togglePlayer('bili_player_18','bili_btn_18','bili_iframe_18','https://player.bilibili.com/player.html?bvid=BV1pyRsYHEVa&page=18&autoplay=0&high_quality=1&danmaku=0')">
+                &#127916; 老友记原声片段
+            </button>
+            <a href="https://www.bilibili.com/video/BV1pyRsYHEVa?p=18" target="_blank" class="btn-bili-fallback" title="在B站打开">&#8599;</a>
+        </div>
+
+        <div id="bili_player_18" class="bili-player" style="display:none;">
+            <div class="player-loading" id="loading_18">⏳ 加载中...</div>
+            <iframe id="bili_iframe_18"
+                    src="about:blank"
+                    data-src="https://player.bilibili.com/player.html?bvid=BV1pyRsYHEVa&page=18&autoplay=0&high_quality=1&danmaku=0"
+                    scrolling="no"
+                    frameborder="0"
+                    allowfullscreen="true"
+                    allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+                    referrerpolicy="no-referrer-when-downgrade"
+                    style="display:none;"
+                    onload="onIframeLoad(this, 'loading_18')">
+            </iframe>
+            <div id="fail_18" class="player-fail" style="display:none;">
+                &#128529; 视频无法嵌入（网络或浏览器限制）<br>
+                <a href="https://www.bilibili.com/video/BV1pyRsYHEVa?p=18" target="_blank" class="btn-open-bili">&#127916; 去B站看原声</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="scene-card" id="scene_19">
+        <div class="scene-header">
+            <h3>&#127916; Scene #19 &middot; &ldquo;allow&rdquo;</h3>
+            <span class="ep-badge">Friends S01E02-P9</span>
+        </div>
+        <div class="scene-dialogue">Rachel: Have you heard about "allow"?
+Joey: Yeah! It means 允许.
+Chandler: Joey knows everything about "allow".
+Monica: Can we just order some food and stop talking about grammar?</div>
+        <div class="scene-translation">瑞秋：你听说过"allow"吗？
+乔伊：当然！意思是允许。
+钱德勒：乔伊什么都知道。
+莫妮卡：我们能先点菜吗？别再讨论语法了。</div>
+
+        <div class="bili-bar">
+            <button id="bili_btn_19" class="btn-bili" onclick="togglePlayer('bili_player_19','bili_btn_19','bili_iframe_19','https://player.bilibili.com/player.html?bvid=BV1pyRsYHEVa&page=19&autoplay=0&high_quality=1&danmaku=0')">
+                &#127916; 老友记原声片段
+            </button>
+            <a href="https://www.bilibili.com/video/BV1pyRsYHEVa?p=19" target="_blank" class="btn-bili-fallback" title="在B站打开">&#8599;</a>
+        </div>
+
+        <div id="bili_player_19" class="bili-player" style="display:none;">
+            <div class="player-loading" id="loading_19">⏳ 加载中...</div>
+            <iframe id="bili_iframe_19"
+                    src="about:blank"
+                    data-src="https://player.bilibili.com/player.html?bvid=BV1pyRsYHEVa&page=19&autoplay=0&high_quality=1&danmaku=0"
+                    scrolling="no"
+                    frameborder="0"
+                    allowfullscreen="true"
+                    allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+                    referrerpolicy="no-referrer-when-downgrade"
+                    style="display:none;"
+                    onload="onIframeLoad(this, 'loading_19')">
+            </iframe>
+            <div id="fail_19" class="player-fail" style="display:none;">
+                &#128529; 视频无法嵌入（网络或浏览器限制）<br>
+                <a href="https://www.bilibili.com/video/BV1pyRsYHEVa?p=19" target="_blank" class="btn-open-bili">&#127916; 去B站看原声</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="scene-card" id="scene_20">
+        <div class="scene-header">
+            <h3>&#127916; Scene #20 &middot; &ldquo;almost&rdquo;</h3>
+            <span class="ep-badge">Friends S01E02-P10</span>
+        </div>
+        <div class="scene-dialogue">Ross: Did you just say "almost"?
+Chandler: I say "almost" all the time. It means adv. 几乎.
+Monica: You guys, stop debating and come eat!</div>
+        <div class="scene-translation">罗斯：你刚才说的是"almost"吗？
+钱德勒：我一直说"almost"。意思是ad几乎。
+莫妮卡：你们，别争了，来吃饭吧！</div>
+
+        <div class="bili-bar">
+            <button id="bili_btn_20" class="btn-bili" onclick="togglePlayer('bili_player_20','bili_btn_20','bili_iframe_20','https://player.bilibili.com/player.html?bvid=BV1pyRsYHEVa&page=20&autoplay=0&high_quality=1&danmaku=0')">
+                &#127916; 老友记原声片段
+            </button>
+            <a href="https://www.bilibili.com/video/BV1pyRsYHEVa?p=20" target="_blank" class="btn-bili-fallback" title="在B站打开">&#8599;</a>
+        </div>
+
+        <div id="bili_player_20" class="bili-player" style="display:none;">
+            <div class="player-loading" id="loading_20">⏳ 加载中...</div>
+            <iframe id="bili_iframe_20"
+                    src="about:blank"
+                    data-src="https://player.bilibili.com/player.html?bvid=BV1pyRsYHEVa&page=20&autoplay=0&high_quality=1&danmaku=0"
+                    scrolling="no"
+                    frameborder="0"
+                    allowfullscreen="true"
+                    allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+                    referrerpolicy="no-referrer-when-downgrade"
+                    style="display:none;"
+                    onload="onIframeLoad(this, 'loading_20')">
+            </iframe>
+            <div id="fail_20" class="player-fail" style="display:none;">
+                &#128529; 视频无法嵌入（网络或浏览器限制）<br>
+                <a href="https://www.bilibili.com/video/BV1pyRsYHEVa?p=20" target="_blank" class="btn-open-bili">&#127916; 去B站看原声</a>
+            </div>
+        </div>
+    </div>
+    
+</div>
+
+<!-- ===== Footer ===== -->
+<div class="footer">
+    <p>🎯 基于龙飞虎《6个月学会任何一种外语》方法论 | 1000高频词 = 85%日常沟通</p>
+    <p>Made with ❤️ for 疙瘩汤's English Learning Journey 🐾</p>
+</div>
+
+<script>
+// ========== TTS (Web Speech API - fallback) ==========
+function speak(text, rate = 0.6) {
+    if ('speechSynthesis' in window) {
+        speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = 'en-US'; u.rate = rate; u.pitch = 1;
+        const voices = speechSynthesis.getVoices();
+        const pref = voices.find(v =>
+            v.name.includes('Jenny') || v.name.includes('Samantha') ||
+            v.name.includes('Microsoft Zira') || v.name.includes('Google US'));
+        if (pref) u.voice = pref;
+        speechSynthesis.speak(u);
+    }
+}
+if ('speechSynthesis' in window) {
+    speechSynthesis.getVoices();
+    speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
+}
+
+// ========== Local TTS Audio Playback (mp3 files) ==========
+let _activeAudioId = null;
+function playLocalAudio(audioId) {
+    const audio   = document.getElementById(audioId);
+    const btn     = document.getElementById(audioId + '_btn');
+    if (!audio || !btn) return;
+
+    // Stop any currently playing audio
+    document.querySelectorAll('.btn-audio-tts').forEach(b => {
+        b.classList.remove('playing');
+        // restore original text (remove playing indicator)
+        const origText = b.getAttribute('data-orig-text');
+        if (origText) b.innerHTML = origText;
+    });
+    document.querySelectorAll('audio').forEach(a => { a.pause(); a.currentTime = 0; });
+    if ('speechSynthesis' in window) speechSynthesis.cancel();
+
+    if (_activeAudioId === audioId && !audio.paused) {
+        // Toggle off: pause
+        audio.pause();
+        audio.currentTime = 0;
+        btn.classList.remove('playing');
+        _activeAudioId = null;
+    } else {
+        // Play
+        _activeAudioId = audioId;
+        if (!btn.hasAttribute('data-orig-text')) {
+            btn.setAttribute('data-orig-text', btn.innerHTML);
+        }
+        btn.classList.add('playing');
+        
+        const playPromise = audio.play();
+        if (playPromise !== undefined) {
+            playPromise.then(() => {
+                // update button to show playing state
+                btn.classList.add('playing');
+                btn.innerHTML = btn.getAttribute('data-orig-text').replace('🔊', '⏸').replace('🗣️', '⏸');
+            }).catch(e => {
+                console.warn('Audio autoplay blocked:', e);
+                btn.classList.remove('playing');
+                _activeAudioId = null;
+            });
+        }
+        
+        audio.onended = function() {
+            btn.classList.remove('playing');
+            btn.innerHTML = btn.getAttribute('data-orig-text') || btn.innerHTML;
+            _activeAudioId = null;
+        };
+        audio.onerror = function() {
+            btn.classList.remove('playing');
+            _activeAudioId = null;
+        };
+    }
+}
+
+// ========== Bilibili Embedded Player ==========
+
+// Detect if we can load cross-origin iframes (file:// blocks them)
+let _iframeOk = null;  // null=unknown, true/false
+function detectIframeSupport(cb) {
+    if (_iframeOk !== null) { cb(_iframeOk); return; }
+    const t = document.createElement('iframe');
+    t.src = 'https://www.bilibili.com/favicon.ico';
+    t.style.cssText = 'width:1px;height:1px;position:absolute;top:-9999px;opacity:0;';
+    t.onload  = () => { _iframeOk = true;  document.body.removeChild(t); cb(true); };
+    t.onerror = () => { _iframeOk = false; document.body.removeChild(t); cb(false); };
+    document.body.appendChild(t);
+    // Timeout fallback: if no event fires in 4s, assume OK (let iframe try itself)
+    setTimeout(() => { if (_iframeOk === null) { _iframeOk = true; cb(true); } }, 4000);
+}
+
+function togglePlayer(playerId, btnId, iframeId, embedUrl) {
+    const player = document.getElementById(playerId);
+    const btn    = document.getElementById(btnId);
+    const iframe = document.getElementById(iframeId);
+    if (!player || !btn || !iframe) return;
+
+    // Close other open players
+    document.querySelectorAll('.bili-player').forEach(p => {
+        if (p.id !== playerId && p.style.display !== 'none') {
+            p.style.display = 'none';
+            const ob = document.getElementById(p.id.replace('bili_player_','bili_btn_'));
+            if (ob) { ob.classList.remove('open'); ob.textContent = '🎬 老友记原声片段'; }
+            // pause iframe src to stop audio
+            const oi = p.querySelector('iframe');
+            if (oi) oi.src = 'about:blank';
+        }
+    });
+
+    if (player.style.display !== 'none') {
+        // Close
+        player.style.display = 'none';
+        iframe.src = 'about:blank';
+        btn.classList.remove('open');
+        btn.innerHTML = '&#127916; 老友记原声片段';
+    } else {
+        // Open
+        player.style.display = 'block';
+        btn.classList.add('open');
+        btn.innerHTML = '&#9203; 播放中 · 点击关闭';
+
+        const loadingEl = document.getElementById('loading_' + playerId.split('_').pop());
+        const failEl    = document.getElementById('fail_'    + playerId.split('_').pop());
+
+        if (loadingEl) loadingEl.style.display = 'block';
+        if (failEl)    failEl.style.display    = 'none';
+        iframe.style.display = 'none';
+
+        // Set iframe src to actually load
+        iframe.src = embedUrl;
+
+        // Timeout: if iframe doesn't trigger onload in 8s, show fail
+        const timer = setTimeout(() => {
+            if (iframe.style.display === 'none') {
+                if (loadingEl) loadingEl.style.display = 'none';
+                if (failEl)    failEl.style.display    = 'block';
+            }
+        }, 8000);
+        iframe._failTimer = timer;
+    }
+}
+
+function onIframeLoad(iframe, loadingId) {
+    // If src was reset to about:blank, ignore
+    if (!iframe.src || iframe.src === 'about:blank') return;
+    clearTimeout(iframe._failTimer);
+
+    const loadingEl = document.getElementById(loadingId);
+    const idx       = loadingId.replace('loading_', '');
+    const failEl    = document.getElementById('fail_' + idx);
+
+    // Try to detect blank/blocked content
+    let blocked = false;
+    try {
+        // If cross-origin access is blocked, contentDocument may throw
+        const doc = iframe.contentDocument || iframe.contentWindow.document;
+        if (!doc || doc.body.innerHTML.trim() === '') blocked = true;
+    } catch(e) {
+        // Cross-origin = normal, not an error
+        blocked = false;
+    }
+
+    if (blocked) {
+        if (loadingEl) loadingEl.style.display = 'none';
+        if (failEl)    failEl.style.display    = 'block';
+        iframe.style.display = 'none';
+    } else {
+        if (loadingEl) loadingEl.style.display = 'none';
+        if (failEl)    failEl.style.display    = 'none';
+        iframe.style.display = 'block';
+    }
+}
+</script>
+
+</body>
+</html>
