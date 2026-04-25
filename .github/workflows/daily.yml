@@ -2,8 +2,10 @@ name: Daily High-Freq Words Generator
 
 on:
   schedule:
-    # 北京时间每天 9:00 = UTC 01:00（提前到9点，因为GitHub免费版schedule可能延迟1-2小时）
-    - cron: '0 1 * * *'
+    # 目标：北京时间每天 10:00 收到
+    # GitHub免费版 cron 实测延迟约2-3小时
+    # UTC 23:00（前一天）= 北京 07:00 触发，延迟3h后约 10:00 收到
+    - cron: '0 23 * * *'
   workflow_dispatch:
     inputs:
       day_num:
