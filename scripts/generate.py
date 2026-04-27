@@ -134,8 +134,9 @@ def generate_word_card(word_data, index):
 # Format: S{season}-E{episode}-P{part}
 # P001-010 = S01E01, P011-020 = S01E02, ... each episode has 10 parts
 BILIBILI_BV = "BV1pyRsYHEVa"
-# 官方外链播放器地址（专为嵌入设计，无X-Frame-Options限制）
-BILIBILI_EMBED_URL = "https://player.bilibili.com/player.html?bvid=" + BILIBILI_BV + "&page="
+# 官方外链播放器地址：用 p= 参数（兼容微信/飞书WebView）而非 page=
+# 协议无关 // 开头，避免 http/https 混合内容问题
+BILIBILI_EMBED_URL = "//player.bilibili.com/player.html?bvid=" + BILIBILI_BV + "&p="
 BILIBILI_PAGE_URL  = "https://www.bilibili.com/video/" + BILIBILI_BV + "?p="
 
 
