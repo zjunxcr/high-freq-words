@@ -133,7 +133,11 @@ def generate_word_card(word_data, index):
 # BV1pyRsYHEVa has 234 parts (Friends S01-S10 clips)
 # Format: S{season}-E{episode}-P{part}
 # P001-010 = S01E01, P011-020 = S01E02, ... each episode has 10 parts
+# Mapping: each word gets a UNIQUE page (linear, no cycling)
+#   word #1 → page 1, word #2 → page 2, ..., word #234 → page 234
+#   word #235+ → wrap to page 1 (but we only have ~1000 words / 100 days)
 BILIBILI_BV = "BV1pyRsYHEVa"
+TOTAL_BILIBILI_PAGES = 234  # S01-S10 全部片段
 # 官方外链播放器地址：用 p= 参数（兼容微信/飞书WebView）而非 page=
 # 协议无关 // 开头，避免 http/https 混合内容问题
 BILIBILI_EMBED_URL = "//player.bilibili.com/player.html?bvid=" + BILIBILI_BV + "&p="
@@ -141,20 +145,29 @@ BILIBILI_PAGE_URL  = "https://www.bilibili.com/video/" + BILIBILI_BV + "?p="
 
 
 def get_bilibili_page(word_index):
-    """Map word index (1-based) to Bilibili page number (1-234)."""
-    available_pages = list(range(1, min(61, 235)))  # pages 1-60, S01E01~S01E06
-    page_idx = (word_index - 1) % len(available_pages)
-    return available_pages[page_idx]
+    """Map word index (1-based) to Bilibili page number (1-234).
+    
+    线性映射，每个词对应唯一的B站分页，不循环。
+    超过234的词从page 1重新开始（100天×10词=1000词，会循环几次）。
+    """
+    return ((word_index - 1) % TOTAL_BILIBILI_PAGES) + 1
 
 
 def get_episode_info(page_num):
-    """Get human-readable episode info from page number."""
+    """Get human-readable episode info from page number.
+    
+    Friends S01-S10, each episode has 10 parts:
+    - S01: E01-24 = pages 1-240 (we only have 234)
+    - S02: E01-24 = pages 241-480
+    - etc.
+    
+    Since BV1pyRsYHEVa has 234 parts total and S01 alone has 240,
+    the mapping is simpler: all 234 pages fall within Season 1 range.
+    """
     episode = ((page_num - 1) // 10) + 1
     part    = ((page_num - 1) % 10) + 1
-    season  = 1
-    if page_num > 60:
-        season  = ((page_num - 1) // 24) + 1
-        episode = ((page_num - 1) % 24) + 1
+    # All 234 pages are within Season 1 (S01E01-P01 ~ S01E24-P04)
+    season = 1
     return f"S{season:02d}E{episode:02d}-P{part}"
 
 
@@ -283,8 +296,7 @@ def generate_tts_audio(text, output_path, voice=TTS_VOICE, rate=TTS_RATE):
         import edge_tts
         
         communicate = edge_tts.Communicate(text, voice=voice, rate=rate)
-        asyncio_run = getattr(edge_tts, 'asyncio', None)
-        # edge_tts uses its own async
+        # edge_tts uses its own async internally
         import asyncio
         
         async def _generate():
@@ -307,27 +319,32 @@ def generate_tts_audio(text, output_path, voice=TTS_VOICE, rate=TTS_RATE):
 
 
 def generate_all_tts_for_day(day_num):
-    """为某一天的所有单词和例句生成音频"""
+    """为某一天的所有单词和例句生成音频
+    
+    注意：此函数目前未被workflow调用。
+    Workflow 使用 generate_audio.py --start N --end M 生成TTS。
+    此函数保留用于本地测试/手动生成场景。
+    """
     words, start_idx, _ = get_words_for_day(day_num)
-    AUDIO_DIR.mkdir(parents=True, exist_ok=True)
     
-    day_audio_dir = AUDIO_DIR / f"day{day_num:03d}"
-    day_audio_dir.mkdir(exist_ok=True)
-    
+    # 使用与 generate_audio.py 一致的目录结构: audio/tts/{index}/
     audio_files = []
     for i, w in enumerate(words):
+        global_idx = start_idx + i
+        word_dir = AUDIO_DIR / f"{global_idx:04d}"
+        word_dir.mkdir(parents=True, exist_ok=True)
+        
         # 单词发音
-        word_mp3 = day_audio_dir / f"{i+1:02d}_{w['word']}_word.mp3"
-        generate_tts_audio(w['word'], word_mp3)
-        if word_mp3.exists():
+        word_mp3 = word_dir / "word.mp3"
+        if generate_tts_audio(w['word'], word_mp3) and word_mp3.exists():
             audio_files.append(word_mp3)
         
-        # 例句发音
-        sent_mp3 = day_audio_dir / f"{i+1:02d}_{w['word']}_sentence.mp3"
-        generate_tts_audio(w['sentence'], sent_mp3)
-        if sent_mp3.exists():
+        # 例句发音  
+        sent_mp3 = word_dir / "sentence.mp3"
+        if generate_tts_audio(w['sentence'], sent_mp3) and sent_mp3.exists():
             audio_files.append(sent_mp3)
     
+    print(f"\n  Day {day_num}: {len(audio_files)} audio files generated")
     return audio_files
 
 
