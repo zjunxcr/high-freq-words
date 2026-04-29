@@ -2,14 +2,14 @@ name: Daily High-Freq Words Generator
 
 on:
   schedule:
-    # 目标：北京时间每天 10:00 收到
-    # GitHub免费版 cron 实测延迟约2-3小时
-    # UTC 23:00（前一天）= 北京 07:00 触发，延迟3h后约 10:00 收到
-    - cron: '0 23 * * *'
+    # 目标：北京时间每天 9:00 收到
+    # GitHub免费版 cron 实测延迟约1-3小时
+    # UTC 01:00（当天）= 北京 09:00 触发，延迟1-3h后约 10:00-12:00 收到
+    - cron: '0 1 * * *'
   workflow_dispatch:
     inputs:
       day_num:
-        description: '指定天数 (1-100)'
+        description: '指定天数 (1-103)'
         required: false
         default: ''
 
@@ -47,11 +47,14 @@ jobs:
             DIFF_SEC=$((TODAY_SEC - START_SEC))
             DAY_NUM=$((DIFF_SEC / 86400 + 1))
             
-            # 边界检查
+            # 边界检查：共1028词，103天完成
             if [ "$DAY_NUM" -lt 1 ]; then DAY_NUM=1; fi
-            if [ "$DAY_NUM" -gt 100 ]; then
-              echo "⚠️ 已超过100天范围，循环回Day 1"
+            if [ "$DAY_NUM" -gt 103 ]; then
+              echo "⚠️ 已完成全部103天课程！循环回Day 1"
+              echo "cycle=true" >> $GITHUB_OUTPUT
               DAY_NUM=1
+            else
+              echo "cycle=false" >> $GITHUB_OUTPUT
             fi
           fi
           
@@ -60,14 +63,26 @@ jobs:
           echo "today=$TODAY" >> $GITHUB_OUTPUT
           echo "📅 Day $DAY_NUM | Date: $TODAY"
 
-      - name: Generate TTS audio for today
+      - name: Generate TTS audio for today (with retry)
         run: |
-          # 计算当天词的序号范围: day_num对应第(day_num-1)*10+1 到 day_num*10
           DAY=${{ steps.calc.outputs.day_num }}
           START=$(( (DAY - 1) * 10 + 1 ))
           END=$(( DAY * 10 ))
+          
+          # 如果END超过词库总数，截断
+          TOTAL=1028
+          if [ "$END" -gt "$TOTAL" ]; then
+            END=$TOTAL
+          fi
+          
           echo "🎙️ 生成第 $START ~ $END 词的 TTS 音频..."
-          python scripts/generate_audio.py --start $START --end $END
+          
+          # 重试机制：最多尝试2次
+          python scripts/generate_audio.py --start $START --end $END || {
+            echo "[RETRY] TTS generation failed, retrying once..."
+            sleep 5
+            python scripts/generate_audio.py --start $START --end $END
+          }
         env:
           PYTHONIOENCODING: utf-8
 
@@ -129,3 +144,12 @@ jobs:
             --date ${{ steps.calc.outputs.today }} \
             --url "https://zjunxcr.github.io/high-freq-words/output/high_freq_words_day$(printf '%03d' ${{ steps.calc.outputs.day_num }})_${{ steps.calc.outputs.today }}.html"
         continue-on-error: true
+
+      # 延迟通知：等Pages部署完成后再发一次确认链接可用（可选）
+      - name: Delayed link check (等待Pages部署)
+        if: always()
+        run: |
+          sleep 30
+          PAGE_URL="https://zjunxcr.github.io/high-freq-words/output/high_freq_words_day$(printf '%03d' ${{ steps.calc.outputs.day_num }})_${{ steps.calc.outputs.today }}.html"
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$PAGE_URL" || echo "000")
+          echo "Pages URL status: $HTTP_CODE ($PAGE_URL)"
