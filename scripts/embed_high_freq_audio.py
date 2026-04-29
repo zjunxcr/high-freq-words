@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
 """
-embed-high-freq-audio.py - 将TTS音频base64内嵌到HTML中
-（参考 daily-words 的 embed-daily-words-audio.py 方案）
+embed_high_freq_audio.py - 将TTS音频base64内嵌到HTML中
 
 用法:
-  python scripts/embed-high-freq-audio.py [day_num] [date_str]
-  # 自动读取 output/ 目录下的HTML，内嵌音频后覆盖保存
-
+  python scripts/embed_high_freq_audio.py [day_num] [date_str]
+  
 原理:
   1. 扫描 HTML 中所有 <audio> 标签的 source src 路径
   2. 读取对应的本地 mp3 文件
@@ -22,6 +20,9 @@ from pathlib import Path
 SCRIPT_DIR = Path(__file__).parent.parent
 AUDIO_DIR = SCRIPT_DIR / "audio" / "tts"
 OUTPUT_DIR = SCRIPT_DIR / "output"
+
+# 单文件大小上限 (KB) - 超过此大小跳过嵌入，避免HTML过大导致WebView无法加载
+MAX_AUDIO_SIZE_KB = 100
 
 
 def embed_audio_to_html(html_path):
@@ -46,6 +47,7 @@ def embed_audio_to_html(html_path):
     print(f"  Found {len(matches)} audio tags to embed")
     
     embedded = 0
+    skipped_large = 0
     for m in reversed(matches):  # 反向遍历，避免位置偏移
         audio_id = m.group(1)
         rel_src = m.group(2)  # e.g., "audio/tts/0001/word.mp3"
@@ -55,6 +57,13 @@ def embed_audio_to_html(html_path):
         
         if not local_file.exists():
             print(f"  [WARN] File not found: {local_file} (for {audio_id})")
+            continue
+        
+        # 检查文件大小
+        file_size_kb = local_file.stat().st_size / 1024
+        if file_size_kb > MAX_AUDIO_SIZE_KB:
+            print(f"  [SKIP-LARGE] {audio_id}: {local_file.name} ({file_size_kb:.1f}KB > {MAX_AUDIO_SIZE_KB}KB)")
+            skipped_large += 1
             continue
         
         # 读取并转base64
@@ -70,12 +79,19 @@ def embed_audio_to_html(html_path):
             embedded += 1
             
             size_kb = len(b64) * 3 / 4 / 1024
-            print(f"  [{embedded}/{len(matches)}] {audio_id}: {local_file.name} ({size_kb:.1f}KB)")
+            print(f"  [{embedded}/{len(matches)}] {audio_id}: {local_file.name} ({file_size_kb:.1f}KB)")
         except Exception as e:
             print(f"  [ERROR] Failed to embed {audio_id}: {e}")
     
     delta = len(html) - orig_size
-    print(f"  Embedded: {embedded}/{len(matches)} | Size change: +{delta/1024:.1f}KB")
+    total_kb = len(html) / 1024
+    
+    print(f"  Embedded: {embedded}/{len(matches)}, Skipped(large): {skipped_large}")
+    print(f"  Size change: +{delta/1024:.1f}KB, Total: {total_kb:.1f}KB")
+    
+    # 警告HTML过大
+    if total_kb > 2000:
+        print(f"  [WARN] HTML exceeds 2MB! WebView may fail to load.")
     
     return html, embedded
 
@@ -88,7 +104,7 @@ def main():
     if date_str:
         html_name = f"high_freq_words_day{int(day_num):03d}_{date_str}.html"
     else:
-        # 自动查找最新的匹配文件
+        # 精确匹配当天day编号的HTML（不再fallback到其他日期）
         candidates = sorted(
             OUTPUT_DIR.glob(f"high_freq_words_day{int(day_num):03d}_*.html"),
             key=lambda p: p.stat().st_mtime,
@@ -97,13 +113,8 @@ def main():
         if candidates:
             html_name = candidates[0].name
         else:
-            # 尝试找任何output文件
-            all_html = list(OUTPUT_DIR.glob("*.html"))
-            if all_html:
-                html_name = sorted(all_html, key=lambda p: p.stat().st_mtime, reverse=True)[0].name
-            else:
-                print("[ERROR] No HTML files found in output/")
-                sys.exit(1)
+            print(f"[ERROR] No HTML file for Day {day_num} found in output/")
+            sys.exit(1)
     
     html_path = OUTPUT_DIR / html_name
     if not html_path.exists():
