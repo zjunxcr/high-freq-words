@@ -187,7 +187,7 @@ async def generate_day_audio(day_num, words):
     results = []
     for i, w in enumerate(words):
         global_idx = (day_num - 1) * 10 + i + 1
-        print(f"  [{i+1}/{len(w)}] #{global_idx} \"{w['word']}\"...")
+        print(f"  [{i+1}/{len(words)}] #{global_idx} \"{w['word']}\"...")
         result = await process_word(w, global_idx, day_num)
         if result:
             results.append(result)
