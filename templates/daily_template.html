@@ -568,58 +568,81 @@ function togglePlayer(playerId, btnId, iframeId, embedUrl) {
     const iframe = document.getElementById(iframeId);
     if (!player || !btn || !iframe) return;
 
-    // Close other open players
-    document.querySelectorAll('.bili-player').forEach(p => {
+    // 关闭其他打开的播放器
+    document.querySelectorAll('.bili-player').forEach(function(p) {
         if (p.id !== playerId && p.style.display !== 'none') {
             p.style.display = 'none';
-            const ob = document.getElementById(p.id.replace('bili_player_','bili_btn_'));
-            if (ob) { ob.classList.remove('open'); ob.textContent = '🎬 老友记原声片段'; }
-            // pause iframe src to stop audio
-            const oi = p.querySelector('iframe');
-            if (oi) oi.src = 'about:blank';
+            var ob = document.getElementById(p.id.replace('bili_player_','bili_btn_'));
+            if (ob) { ob.classList.remove('open'); ob.textContent = '\u{1F3AC} \u8001\u53CB\u8BB0\u539F\u58F0\u7247\u6BB5'; }
+            var oi = p.querySelector('iframe');
+            if (oi && oi.parentNode) oi.parentNode.removeChild(oi);
         }
     });
 
     if (player.style.display !== 'none') {
-        // Close
+        // 关闭当前播放器
         player.style.display = 'none';
-        iframe.src = 'about:blank';
+        if (iframe.parentNode) iframe.parentNode.removeChild(iframe);
         btn.classList.remove('open');
-        btn.innerHTML = '&#127916; 老友记原声片段';
+        btn.innerHTML = '&#127916; \u8001\u53CB\u8BB0\u539F\u58F0\u7247\u6BB5';
     } else {
-        // Open
+        // 打开：彻底销毁旧iframe并创建全新的（解决B站播放器缓存导致重复播放问题）
         player.style.display = 'block';
         btn.classList.add('open');
-        btn.innerHTML = '&#9203; 播放中 · 点击关闭';
+        btn.innerHTML = '&#9203; \u64AD\u653E\u4E2D &middot; \u70B9\u51FB\u5173\u95ED';
 
-        const loadingEl = document.getElementById('loading_' + playerId.split('_').pop());
-        const failEl    = document.getElementById('fail_'    + playerId.split('_').pop());
+        var idx       = playerId.split('_').pop();
+        var loadingEl = document.getElementById('loading_' + idx);
+        var failEl    = document.getElementById('fail_' + idx);
 
         if (loadingEl) loadingEl.style.display = 'block';
         if (failEl)    failEl.style.display    = 'none';
-        iframe.style.display = 'none';
 
-        // Force fresh load: add timestamp to bust cache & ensure correct page
-        const sep = embedUrl.indexOf('?') > -1 ? '&' : '?';
-        const freshUrl = embedUrl + sep + '_t=' + Date.now();
-        
-        // Reset iframe completely before setting new src
-        iframe.src = 'about:blank';
-        // Use setTimeout to ensure the browser registers the about:blank reset first
-        setTimeout(() => {
-            iframe.src = freshUrl;
-        }, 50);
+        // 彻底销毁旧 iframe
+        var oldIframe = document.getElementById(iframeId);
+        if (oldIframe && oldIframe.parentNode) {
+            oldIframe.parentNode.removeChild(oldIframe);
+        }
 
-        // Timeout: if iframe doesn't trigger onload in 8s, show fail
-        const timer = setTimeout(() => {
-            if (iframe.style.display === 'none') {
+        // 创建全新 iframe
+        var freshIframe = document.createElement('iframe');
+        freshIframe.id = iframeId;
+        freshIframe.scrolling = 'no';
+        freshIframe.frameBorder = '0';
+        freshIframe.allowFullscreen = true;
+        freshIframe.allow = 'autoplay; encrypted-media; fullscreen; picture-in-picture';
+        freshIframe.referrerPolicy = 'no-referrer-when-downgrade';
+        freshIframe.style.cssText = 'width:100%;height:400px;border:none;display:block;';
+        freshIframe.onload = function() { onIframeLoad(freshIframe, 'loading_' + idx); };
+
+        // 添加随机参数防止缓存
+        var sep = embedUrl.indexOf('?') > -1 ? '&' : '?';
+        var freshUrl = embedUrl + sep + '_t=' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+
+        // 先插入DOM再设置src
+        var insertTarget = failEl || loadingEl;
+        if (insertTarget && insertTarget.parentNode) {
+            insertTarget.parentNode.insertBefore(freshIframe, insertTarget);
+        } else {
+            player.appendChild(freshIframe);
+        }
+        freshIframe.src = freshUrl;
+
+        // 10s超时
+        freshIframe._failTimer = setTimeout(function() {
+            try {
+                if (!freshIframe.contentWindow) {
+                    if (loadingEl) loadingEl.style.display = 'none';
+                    if (failEl)    failEl.style.display = 'block';
+                }
+            } catch(e) {
                 if (loadingEl) loadingEl.style.display = 'none';
-                if (failEl)    failEl.style.display    = 'block';
+                if (failEl)    failEl.style.display = 'block';
             }
-        }, 8000);
-        iframe._failTimer = timer;
+        }, 10000);
     }
 }
+
 
 function onIframeLoad(iframe, loadingId) {
     // If src was reset to about:blank, ignore
