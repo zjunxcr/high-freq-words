@@ -77,11 +77,13 @@ jobs:
           
           echo "🎙️ 生成第 $START ~ $END 词的 TTS 音频..."
           
+          # 强制重新生成（--force），避免使用仓库中过期的旧音频
+          # 旧音频可能对应旧版句子内容，导致发音与例句不匹配
           # 重试机制：最多尝试2次
-          python scripts/generate_audio.py --start $START --end $END || {
+          python scripts/generate_audio.py --start $START --end $END --force || {
             echo "[RETRY] TTS generation failed, retrying once..."
             sleep 5
-            python scripts/generate_audio.py --start $START --end $END
+            python scripts/generate_audio.py --start $START --end $END --force
           }
         env:
           PYTHONIOENCODING: utf-8
