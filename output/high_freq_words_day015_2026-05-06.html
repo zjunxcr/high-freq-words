@@ -1374,59 +1374,92 @@ function detectIframeSupport(cb) {
 function togglePlayer(playerId, btnId, iframeId, embedUrl) {
     const player = document.getElementById(playerId);
     const btn    = document.getElementById(btnId);
-    const iframe = document.getElementById(iframeId);
-    if (!player || !btn || !iframe) return;
+    if (!player || !btn) return;
 
-    // Close other open players
+    // Close other open players — destroy their iframes to stop audio
     document.querySelectorAll('.bili-player').forEach(p => {
         if (p.id !== playerId && p.style.display !== 'none') {
             p.style.display = 'none';
             const ob = document.getElementById(p.id.replace('bili_player_','bili_btn_'));
             if (ob) { ob.classList.remove('open'); ob.textContent = '🎬 老友记原声片段'; }
-            // pause iframe src to stop audio
+            // Destroy iframe completely to stop audio
             const oi = p.querySelector('iframe');
-            if (oi) oi.src = 'about:blank';
+            if (oi && oi.parentNode) {
+                oi.src = 'about:blank';
+                oi.parentNode.removeChild(oi);
+            }
         }
     });
 
     if (player.style.display !== 'none') {
-        // Close
+        // Close — destroy iframe to stop audio
         player.style.display = 'none';
-        iframe.src = 'about:blank';
         btn.classList.remove('open');
         btn.innerHTML = '&#127916; 老友记原声片段';
+        const oldIframe = document.getElementById(iframeId);
+        if (oldIframe && oldIframe.parentNode) {
+            oldIframe.src = 'about:blank';
+            oldIframe.parentNode.removeChild(oldIframe);
+        }
     } else {
-        // Open
+        // Open — ALWAYS destroy old iframe and create a brand new one
+        // This is the ONLY reliable way to force Bilibili player to load the correct p= page
+        // Reusing an existing iframe causes B站 to ignore p= and replay the last-viewed episode
         player.style.display = 'block';
         btn.classList.add('open');
         btn.innerHTML = '&#9203; 播放中 · 点击关闭';
 
-        const loadingEl = document.getElementById('loading_' + playerId.split('_').pop());
-        const failEl    = document.getElementById('fail_'    + playerId.split('_').pop());
+        const idx       = playerId.split('_').pop();
+        const loadingEl = document.getElementById('loading_' + idx);
+        const failEl    = document.getElementById('fail_'    + idx);
+        const container = player;
 
         if (loadingEl) loadingEl.style.display = 'block';
         if (failEl)    failEl.style.display    = 'none';
-        iframe.style.display = 'none';
 
-        // Force fresh load: add timestamp to bust cache & ensure correct page
-        const sep = embedUrl.indexOf('?') > -1 ? '&' : '?';
-        const freshUrl = embedUrl + sep + '_t=' + Date.now();
-        
-        // Reset iframe completely before setting new src
-        iframe.src = 'about:blank';
-        // Use setTimeout to ensure the browser registers the about:blank reset first
-        setTimeout(() => {
-            iframe.src = freshUrl;
-        }, 50);
+        // Destroy old iframe if exists
+        const oldIframe = document.getElementById(iframeId);
+        if (oldIframe && oldIframe.parentNode) {
+            oldIframe.src = 'about:blank';
+            oldIframe.parentNode.removeChild(oldIframe);
+        }
 
-        // Timeout: if iframe doesn't trigger onload in 8s, show fail
+        // Add timestamp to prevent URL cache
+        const sep      = embedUrl.indexOf('?') > -1 ? '&' : '?';
+        const freshUrl = embedUrl + sep + '_t=' + Date.now() + Math.floor(Math.random()*10000);
+
+        // Create brand new iframe — guarantees correct p= page loads
+        const newIframe = document.createElement('iframe');
+        newIframe.id                = iframeId;
+        newIframe.scrolling         = 'no';
+        newIframe.frameBorder       = '0';
+        newIframe.allowFullscreen   = true;
+        newIframe.setAttribute('allow', 'autoplay; encrypted-media; fullscreen; picture-in-picture');
+        newIframe.setAttribute('referrerpolicy', 'no-referrer-when-downgrade');
+        newIframe.style.cssText     = 'width:100%;height:100%;display:none;';
+
+        // Insert before loadingEl (or append to container)
+        if (loadingEl && loadingEl.parentNode === container) {
+            container.insertBefore(newIframe, loadingEl);
+        } else {
+            container.appendChild(newIframe);
+        }
+
+        // Set src AFTER inserting into DOM
+        newIframe.src = freshUrl;
+
+        // Timeout: show fail if iframe doesn't load in 10s
         const timer = setTimeout(() => {
-            if (iframe.style.display === 'none') {
+            if (newIframe.style.display === 'none') {
                 if (loadingEl) loadingEl.style.display = 'none';
                 if (failEl)    failEl.style.display    = 'block';
             }
-        }, 8000);
-        iframe._failTimer = timer;
+        }, 10000);
+        newIframe._failTimer = timer;
+
+        newIframe.onload = function() {
+            onIframeLoad(newIframe, 'loading_' + idx);
+        };
     }
 }
 
