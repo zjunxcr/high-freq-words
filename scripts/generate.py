@@ -137,7 +137,7 @@ def generate_word_card(word_data, index):
 #   word #1 → page 1, word #2 → page 2, ..., word #234 → page 234
 #   word #235+ → wrap to page 1 (but we only have ~1000 words / 100 days)
 BILIBILI_BV = "BV1pyRsYHEVa"
-TOTAL_BILIBILI_PAGES = 234  # S01-S10 全部片段
+TOTAL_BILIBILI_PAGES = 99  # 实际分P数（2026-05-08 从B站页面实测确认）  # S01-S10 全部片段
 # 官方外链播放器地址：用 p= 参数（兼容微信/飞书WebView）而非 page=
 # 协议无关 // 开头，避免 http/https 混合内容问题
 BILIBILI_EMBED_URL = "//player.bilibili.com/player.html?bvid=" + BILIBILI_BV + "&p="
